@@ -7,7 +7,6 @@ import it.unicam.cs.mdp.vectorrace.view.CircuitSelectionView;
 import javafx.application.Application;
 import javafx.stage.Stage;
 
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.io.Console;
 import java.util.Scanner;
@@ -36,18 +35,33 @@ public class Main extends Application {
         String circuitPath = null;
         String playerFile = PLAYERS_FILE;
 
-        // Utilizziamo System.console() se disponibile, altrimenti Scanner
         Console console = System.console();
         if (console != null) {
-            // Modalità console interattiva
             while (circuitPath == null) {
                 cliView.showCircuitSelection();
                 String input = console.readLine();
                 circuitPath = handleCircuitSelection(input, cliView);
             }
-            runGameLoop(circuitPath, playerFile, cliView, console);
+
+            try {
+                // Inizializza subito il gioco dopo la selezione del circuito
+                GameState gameState = GameController.initializeGame(circuitPath, playerFile);
+                GameController controller = new GameController(gameState, cliView);
+
+                // Mostra lo stato iniziale e il menu
+                cliView.displayGameState(gameState);
+
+                boolean running = true;
+                while (running) {
+                    cliView.showGameMenu(); // Mostra il menu immediatamente
+                    String input = console.readLine();
+                    running = handleGameMenuChoice(input, controller, cliView);
+                }
+            } catch (Exception e) {
+                System.err.println("Errore durante l'inizializzazione del gioco: " + e.getMessage());
+                e.printStackTrace();
+            }
         } else {
-            // Fallback a Scanner per ambiente non interattivo
             try (Scanner scanner = new Scanner(System.in)) {
                 while (circuitPath == null) {
                     cliView.showCircuitSelection();
@@ -60,7 +74,25 @@ public class Main extends Application {
                         break;
                     }
                 }
-                runGameLoop(circuitPath, playerFile, cliView, scanner);
+
+                try {
+                    // Inizializza subito il gioco dopo la selezione del circuito
+                    GameState gameState = GameController.initializeGame(circuitPath, playerFile);
+                    GameController controller = new GameController(gameState, cliView);
+
+                    // Mostra lo stato iniziale e il menu
+                    cliView.displayGameState(gameState);
+
+                    boolean running = true;
+                    while (running && scanner.hasNextLine()) {
+                        cliView.showGameMenu(); // Mostra il menu immediatamente
+                        String input = scanner.nextLine();
+                        running = handleGameMenuChoice(input, controller, cliView);
+                    }
+                } catch (Exception e) {
+                    System.err.println("Errore durante l'inizializzazione del gioco: " + e.getMessage());
+                    e.printStackTrace();
+                }
             }
         }
     }
@@ -85,42 +117,6 @@ public class Main extends Application {
         }
     }
 
-    private static void runGameLoop(String circuitPath, String playerFile, CLIView cliView, Console console) {
-        try {
-            GameState gameState = GameController.initializeGame(circuitPath, playerFile);
-            GameController controller = new GameController(gameState, cliView);
-            cliView.displayGameState(gameState);
-
-            boolean running = true;
-            while (running) {
-                cliView.showGameMenu();
-                String input = console.readLine();
-                running = handleGameMenuChoice(input, controller, cliView);
-            }
-        } catch (Exception e) {
-            System.err.println("Errore durante l'inizializzazione del gioco: " + e.getMessage());
-            e.printStackTrace();
-        }
-    }
-
-    private static void runGameLoop(String circuitPath, String playerFile, CLIView cliView, Scanner scanner) {
-        try {
-            GameState gameState = GameController.initializeGame(circuitPath, playerFile);
-            GameController controller = new GameController(gameState, cliView);
-            cliView.displayGameState(gameState);
-
-            boolean running = true;
-            while (running && scanner.hasNextLine()) {
-                cliView.showGameMenu();
-                String input = scanner.nextLine();
-                running = handleGameMenuChoice(input, controller, cliView);
-            }
-        } catch (Exception e) {
-            System.err.println("Errore durante l'inizializzazione del gioco: " + e.getMessage());
-            e.printStackTrace();
-        }
-    }
-
     private static boolean handleGameMenuChoice(String input, GameController controller, CLIView cliView) {
         try {
             int choice = Integer.parseInt(input);
@@ -128,22 +124,16 @@ public class Main extends Application {
                 case 1: // Avvia simulazione automatica
                     runSimulation(controller, cliView);
                     // Se il gioco è finito, termina
-                    if (controller.getGameState().isFinished()) {
-                        return false;
-                    }
-                    return true;
+                    return !controller.getGameState().isFinished();
                 case 2: // Avanza di un turno
                     if (!controller.getGameState().isFinished()) {
                         controller.advanceTurn();
                         // Se il gioco è finito dopo questo turno, termina
-                        if (controller.getGameState().isFinished()) {
-                            return false;
-                        }
+                        return !controller.getGameState().isFinished();
                     } else {
                         System.out.println("La gara è già terminata!");
                         return false;
                     }
-                    return true;
                 case 3: // Esci
                     return false;
                 default:

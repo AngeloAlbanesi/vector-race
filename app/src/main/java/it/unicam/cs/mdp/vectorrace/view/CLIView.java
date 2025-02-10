@@ -19,6 +19,7 @@ public class CLIView {
      */
     public void displayMessage(String message) {
         System.out.println(message);
+        System.out.flush(); // Forza l'output immediato
     }
 
     /**
@@ -29,7 +30,8 @@ public class CLIView {
         System.out.println("1. Circuito 1");
         System.out.println("2. Circuito 2");
         System.out.println("3. Circuito 3");
-        System.out.println("Seleziona un circuito (1-3):");
+        System.out.print("Seleziona un circuito (1-3): ");
+        System.out.flush(); // Forza l'output immediato
     }
 
     /**
@@ -40,7 +42,8 @@ public class CLIView {
         System.out.println("1. Avvia simulazione");
         System.out.println("2. Avanza di un turno");
         System.out.println("3. Esci");
-        System.out.println("Seleziona un'opzione (1-3):");
+        System.out.print("Seleziona un'opzione (1-3): ");
+        System.out.flush(); // Forza l'output immediato
     }
 
     /**
@@ -91,10 +94,12 @@ public class CLIView {
         clearScreen();
         System.out.println("=== Stato attuale del circuito ===");
         for (int y = 0; y < height; y++) {
+            StringBuilder line = new StringBuilder();
             for (int x = 0; x < width; x++) {
-                System.out.print(grid[y][x]);
+                line.append(grid[y][x]);
             }
-            System.out.println();
+            System.out.println(line.toString());
+            System.out.flush(); // Forza l'output di ogni riga
         }
 
         // Stampa informazioni dei giocatori
@@ -105,12 +110,14 @@ public class CLIView {
                     player.getPosition(),
                     player.getVelocity(),
                     player.getNextCheckpointIndex());
+            System.out.flush(); // Forza l'output di ogni riga di stato
         }
 
         if (gameState.isFinished()) {
             Player winner = gameState.getWinner();
             if (winner != null) {
                 System.out.println("\n🏆 Il Giocatore " + winner.getName() + " ha vinto la gara! 🏆");
+                System.out.flush();
                 // Aspetta un secondo per assicurarsi che l'utente veda il messaggio
                 try {
                     Thread.sleep(1000);
@@ -121,6 +128,13 @@ public class CLIView {
                 System.exit(0);
             }
         }
+
+        // Mostra automaticamente il menu dopo lo stato del gioco
+        showGameMenu();
+
+        // Lascia una riga vuota per separare lo stato dal menu
+        System.out.println();
+        System.out.flush();
     }
 
     /**
