@@ -6,6 +6,7 @@ import it.unicam.cs.mdp.vectorrace.model.Player;
 import it.unicam.cs.mdp.vectorrace.model.Position;
 import it.unicam.cs.mdp.vectorrace.model.Track;
 import it.unicam.cs.mdp.vectorrace.model.Vector;
+import it.unicam.cs.mdp.vectorrace.model.MovementManager;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.application.Application;
@@ -19,7 +20,9 @@ import javafx.scene.control.Label;
 import javafx.scene.control.Slider;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
+import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 
@@ -37,7 +40,8 @@ public class GUIView extends Application {
     private Timeline timeline;
     private Label statusLabel;
     private boolean isPaused = true;
-    private int cellSize = 30; // Dimensione in pixel di ogni cella
+    private int cellSize = 15; // Ridotto da 30 a 15 per celle più piccole
+    private final MovementManager movementManager = new MovementManager();
 
     /**
      * Imposta lo stato di gioco da visualizzare.
@@ -56,8 +60,18 @@ public class GUIView extends Application {
             return;
         }
 
-        BorderPane root = new BorderPane();
+        // Calcola le dimensioni della finestra in base allo schermo
+        Screen screen = Screen.getPrimary();
+        double maxWidth = screen.getVisualBounds().getWidth() * 0.8;
+        double maxHeight = screen.getVisualBounds().getHeight() * 0.8;
+
+        // Calcola il cellSize ottimale
         Track track = gameState.getTrack();
+        double widthRatio = maxWidth / track.getWidth();
+        double heightRatio = maxHeight / track.getHeight();
+        cellSize = (int) Math.min(Math.min(widthRatio, heightRatio), 30);
+
+        BorderPane root = new BorderPane();
         canvas = new Canvas(track.getWidth() * cellSize, track.getHeight() * cellSize);
         root.setCenter(canvas);
 
@@ -66,14 +80,19 @@ public class GUIView extends Application {
         Button pauseButton = new Button("Pausa");
         Button stepButton = new Button("Passo");
         statusLabel = new Label("Pronto");
+
+        // Slider per la velocità
         Slider speedSlider = new Slider(0.1, 2.0, 1.0);
         speedSlider.setShowTickLabels(true);
         speedSlider.setShowTickMarks(true);
 
-        HBox controls = new HBox(10, startButton, pauseButton, stepButton, new Label("Velocità:"), speedSlider,
-                statusLabel);
-        controls.setPadding(new Insets(10));
-        root.setBottom(controls);
+        // Layout migliorato per i controlli
+        VBox controlsBox = new VBox(10);
+        HBox buttons = new HBox(10, startButton, pauseButton, stepButton);
+        HBox sliderBox = new HBox(10, new Label("Velocità:"), speedSlider);
+        controlsBox.getChildren().addAll(buttons, sliderBox, statusLabel);
+        controlsBox.setPadding(new Insets(10));
+        root.setBottom(controlsBox);
 
         // Eventi di controllo
         startButton.setOnAction(e -> {
@@ -110,6 +129,7 @@ public class GUIView extends Application {
         Scene scene = new Scene(root);
         primaryStage.setTitle("Vector Rally - Simulazione");
         primaryStage.setScene(scene);
+        primaryStage.setResizable(true);
         primaryStage.show();
 
         draw(); // Disegna lo stato iniziale
@@ -122,22 +142,26 @@ public class GUIView extends Application {
         Player currentPlayer = gameState.getCurrentPlayer();
         Track track = gameState.getTrack();
 
-        // Ottieni l'accelerazione *prima* di calcolare la nuova posizione
+        // Ottieni l'accelerazione
         Vector acceleration = currentPlayer.getNextAcceleration(gameState);
         if (acceleration == null) {
             statusLabel.setText(currentPlayer.getName() + " non ha fornito un'accelerazione valida.");
-            acceleration = new Vector(0, 0); // Accelerazione di default
+            acceleration = new Vector(0, 0);
         }
 
-        // Prova ad applicare il movimento
-        if (!currentPlayer.move(acceleration, gameState)) {
-            // Se il movimento non è valido, resetta la velocità e notifica
+        // Prova ad applicare il movimento usando MovementManager
+        if (!movementManager.validateMove(currentPlayer, acceleration, gameState)) {
             statusLabel.setText(currentPlayer.getName() + " ha colliso! Velocità resettata.");
             currentPlayer.resetVelocity();
         } else {
-            // Il movimento è riuscito, verifica se ha raggiunto il traguardo
-            CellType currentCell = track.getCell(currentPlayer.getPosition().getX(),
-                    currentPlayer.getPosition().getY());
+            // Il movimento è valido, aggiorna posizione e velocità
+            Vector newVelocity = currentPlayer.getVelocity().add(acceleration);
+            Position newPosition = currentPlayer.getPosition().move(newVelocity);
+            currentPlayer.updatePosition(newPosition);
+            currentPlayer.updateVelocity(newVelocity);
+
+            // Verifica se ha raggiunto il traguardo
+            CellType currentCell = track.getCell(newPosition.getX(), newPosition.getY());
             if (currentCell == CellType.FINISH) {
                 statusLabel.setText(currentPlayer.getName() + " ha raggiunto il traguardo!");
             }
