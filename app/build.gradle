@@ -24,8 +24,10 @@ repositories {
 dependencies {
     implementation "org.openjfx:javafx-controls:21.0.4"
     implementation "org.openjfx:javafx-fxml:21.0.4"
+    implementation 'org.fusesource.jansi:jansi:2.4.1'
     // Use JUnit Jupiter for testing.
-    testImplementation libs.junit.jupiter
+    testImplementation platform('org.junit:junit-bom:5.9.1')
+    testImplementation 'org.junit.jupiter:junit-jupiter'
 
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 
@@ -58,6 +60,9 @@ tasks.named('run') {
     }
     systemProperty "java.awt.headless", "false"
     systemProperty "prism.order", "sw"
+    standardInput = System.in
+    // Enable ANSI color support for Windows
+    systemProperty 'jansi.passthrough', 'true'
     
     // Disabilita la cache di configurazione per il task run
     notCompatibleWithConfigurationCache('Task :run cannot be serialized')
