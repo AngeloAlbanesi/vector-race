@@ -56,6 +56,11 @@ tasks.named('run') {
     if (System.getProperty('args') != null) {
         args System.getProperty('args').split()
     }
+    systemProperty "java.awt.headless", "false"
+    systemProperty "prism.order", "sw"
+    
+    // Disabilita la cache di configurazione per il task run
+    notCompatibleWithConfigurationCache('Task :run cannot be serialized')
 }
 
 // Add GUI task
