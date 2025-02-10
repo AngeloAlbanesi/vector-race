@@ -75,6 +75,7 @@ public class GUIView extends Application {
         Button startButton = new Button("Avvia");
         Button pauseButton = new Button("Pausa");
         Button stepButton = new Button("Passo");
+        Button exitButton = new Button("Termina gara");
         statusLabel = new Label("Pronto");
 
         // Slider per la velocità
@@ -84,7 +85,7 @@ public class GUIView extends Application {
 
         // Layout migliorato per i controlli
         VBox controlsBox = new VBox(10);
-        HBox buttons = new HBox(10, startButton, pauseButton, stepButton);
+        HBox buttons = new HBox(10, startButton, pauseButton, stepButton, exitButton);
         HBox sliderBox = new HBox(10, new Label("Velocità:"), speedSlider);
         controlsBox.getChildren().addAll(buttons, sliderBox, statusLabel);
         controlsBox.setPadding(new Insets(10));
@@ -106,6 +107,10 @@ public class GUIView extends Application {
                 advanceTurn();
                 draw();
             }
+        });
+        exitButton.setOnAction(e -> {
+            timeline.stop();
+            Platform.exit();
         });
 
         // Timeline per aggiornamenti automatici (inizialmente ferma)
@@ -147,7 +152,8 @@ public class GUIView extends Application {
 
         // Movimento valido su muri/giocatori fermi?
         if (!movementManager.validateMove(currentPlayer, acceleration, gameState)) {
-            statusLabel.setText(currentPlayer.getName() + " ha colliso con un muro o giocatore fermo! Velocità resettata.");
+            statusLabel.setText(
+                    currentPlayer.getName() + " ha colliso con un muro o giocatore fermo! Velocità resettata.");
             currentPlayer.resetVelocity();
         } else {
             // Movimento ok su muri, costruiamo la nuova posizione
@@ -157,7 +163,8 @@ public class GUIView extends Application {
             // Controllo "anti-sovrapposizione" con altri giocatori GIA' mossi
             if (isPositionOccupiedByOtherPlayer(newPosition, currentPlayer)) {
                 // Se la cella è già presa, il giocatore resta fermo
-                statusLabel.setText(currentPlayer.getName() + " ha trovato la cella occupata da un altro giocatore, resta fermo!");
+                statusLabel.setText(
+                        currentPlayer.getName() + " ha trovato la cella occupata da un altro giocatore, resta fermo!");
                 currentPlayer.resetVelocity();
             } else {
                 // Non è occupata: aggiorniamo posizione e velocità
@@ -178,7 +185,7 @@ public class GUIView extends Application {
             gameState.setWinner(currentPlayer);
             statusLabel.setText("Vincitore: " + currentPlayer.getName());
             timeline.stop(); // Ferma l'animazione
-            return; 
+            return;
         }
 
         // Passa turno
@@ -255,8 +262,8 @@ public class GUIView extends Application {
                     player.getColor().getBlue());
             gc.setFill(pColor);
             gc.fillOval(pos.getX() * cellSize + 2,
-                        pos.getY() * cellSize + 2,
-                        cellSize - 4, cellSize - 4);
+                    pos.getY() * cellSize + 2,
+                    cellSize - 4, cellSize - 4);
 
             // Mostra il prossimo checkpoint
             gc.setFill(Color.BLACK);
@@ -268,7 +275,8 @@ public class GUIView extends Application {
 
     /**
      * Restituisce un numero fittizio per il checkpoint (solo per disegno),
-     * se la logica del circuito ha definito un'ordinazione. Rimane il tuo codice esistente.
+     * se la logica del circuito ha definito un'ordinazione. Rimane il tuo codice
+     * esistente.
      */
     private int getCheckpointNumber(Track track, int x, int y) {
         // Ordina i checkpoint da sinistra a destra (logica fittizia esistente)
