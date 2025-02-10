@@ -1,6 +1,11 @@
 package model;
 
 import org.junit.jupiter.api.Test;
+
+import it.unicam.cs.mdp.vectorrace.model.Position;
+import it.unicam.cs.mdp.vectorrace.model.Vector;
+import it.unicam.cs.mdp.vectorrace.model.VectorRacePathState;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 public class VectorRacePathStateTest {

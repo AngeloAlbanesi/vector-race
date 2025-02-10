@@ -48,10 +48,11 @@ java {
 
 application {
     // Define the main class for the application.
-    mainClass = 'Main'
+    mainClass = 'it.unicam.cs.mdp.vectorrace.Main'
 }
 
 tasks.named('run') {
+    systemProperty 'org.gradle.configuration-cache', 'false'
     if (System.getProperty('args') != null) {
         args System.getProperty('args').split()
     }
@@ -59,7 +60,7 @@ tasks.named('run') {
 
 // Add GUI task
 tasks.register('gui', JavaExec) {
-    mainClass = 'Main'
+    mainClass = 'it.unicam.cs.mdp.vectorrace.Main'
     args 'gui'
     classpath = sourceSets.main.runtimeClasspath
 }
