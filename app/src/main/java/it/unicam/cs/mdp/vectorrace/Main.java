@@ -21,7 +21,7 @@ public class Main {
         }
 
         // Percorsi corretti per i file di configurazione usando il classloader
-        String trackFile = "src/main/resources/circuits/circuit4.txt";
+        String trackFile = "src/main/resources/circuits/circuit2.txt";
         String playerFile = "src/main/resources/players/players.txt";
 
         try {

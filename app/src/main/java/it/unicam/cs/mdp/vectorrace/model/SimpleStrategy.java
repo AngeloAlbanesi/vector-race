@@ -31,7 +31,10 @@ public class SimpleStrategy implements AIStrategy {
     private Map<String, Vector> lastTriedAcceleration = new HashMap<>();
     private Map<String, Integer> failedAttemptsCounter = new HashMap<>();
 
+    // Mappa dei checkpoint per livello (static: non cambia dopo l'inizializzazione)
     private Map<Integer, Set<Position>> checkpointsByLevel = new HashMap<>();
+    private boolean checkpointsMapInitialized = false;
+
     private Map<String, Position> playerTargets = new HashMap<>();
     private Map<String, Integer> stuckCounter = new HashMap<>();
     private Map<Position, String> checkpointReservations = new HashMap<>();
@@ -49,11 +52,10 @@ public class SimpleStrategy implements AIStrategy {
         Vector currentVelocity = player.getVelocity();
         Position currentPosition = player.getPosition();
 
-        // Gestione di uno storico di posizioni per capire se il bot gira in tondo o resta fermo
+        // Gestione dello storico per verificare eventuali loop
         Set<Position> history = playerHistory.computeIfAbsent(playerName, k -> new HashSet<>());
         history.add(currentPosition);
 
-        // Se si è girato in tondo diverse volte, resetta contatori e forza ricalcolo
         if (history.size() > 5) {
             int loopCount = loopCounter.getOrDefault(playerName, 0);
             if (loopCount >= 3) {
@@ -66,45 +68,41 @@ public class SimpleStrategy implements AIStrategy {
             }
         }
 
-        // Se il giocatore è fermo da troppi turni, sblocco casuale
+        // Gestione del “blocco” (stuck): se il giocatore è fermo per troppi turni, si applica una spinta casuale
         if (currentVelocity.getDx() == 0 && currentVelocity.getDy() == 0) {
             int stuck = stuckCounter.getOrDefault(playerName, 0) + 1;
             stuckCounter.put(playerName, stuck);
-
             if (stuck >= 3) {
                 history.clear();
                 playerTargets.remove(playerName);
                 lastDirection.remove(playerName);
                 stuckCounter.put(playerName, 0);
-                // Piccola spinta casuale per provare a sbloccarsi
                 return new Vector(random.nextInt(3) - 1, random.nextInt(3) - 1);
             }
         } else {
             stuckCounter.put(playerName, 0);
-            // Se abbiamo velocità != 0, aggiorniamo lastDirection
-            if (currentVelocity.getDx() != 0 || currentVelocity.getDy() != 0) {
+            if (!currentVelocity.isZero()) {
                 lastDirection.put(playerName, currentVelocity);
             }
         }
 
-        // Aggiorno la mappa dei checkpoint e le posizioni occupate
-        updateCheckpointMap(gameState.getTrack());
+        // Inizializza la mappa dei checkpoint (sola volta) perché il tracciato è statico
+        if (!checkpointsMapInitialized) {
+            updateCheckpointMap(gameState.getTrack());
+            checkpointsMapInitialized = true;
+        }
         updateOccupiedPositions(gameState);
-
-        // Rimuovo le prenotazioni non più necessarie
         cleanupReservations(gameState);
 
-        // Trovo (o aggiorno) il prossimo target
+        // Seleziona (o aggiorna) il target corrente
         Position target = findNextTarget(player, gameState);
         if (target == null) {
-            // Se non esistono più checkpoint, provo col traguardo
+            // Se non ci sono più checkpoint, prova con il traguardo
             target = findFinishCell(gameState);
             if (target == null) {
-                // Nessun obiettivo rimasto, sto fermo
                 return new Vector(0, 0);
             }
         }
-
         checkpointReservations.put(target, playerName);
         playerTargets.put(playerName, target);
 
@@ -112,10 +110,9 @@ public class SimpleStrategy implements AIStrategy {
         VectorRacePathState bestPath = findPath(player, gameState, target);
         if (bestPath != null && bestPath.getParent() != null) {
             Vector chosenAcc = bestPath.getVelocity().subtract(currentVelocity);
-
             if (isMoveValid(player, chosenAcc, gameState)) {
                 resetFailCount(playerName, chosenAcc);
-                // Controllo eventuali checkpoint
+                // Aggiornamento checkpoint: la strategia gestisce l'update quando la traiettoria è eseguita
                 Position nextPos = currentPosition.move(currentVelocity.add(chosenAcc));
                 checkCrossedCheckpoint(player, currentPosition, nextPos, gameState);
                 return chosenAcc;
@@ -124,7 +121,7 @@ public class SimpleStrategy implements AIStrategy {
             }
         }
 
-        // 2) Se A* non ha prodotto mossa valida, uso getSimpleAcceleration
+        // 2) Se A* non produce una mossa valida, usa getSimpleAcceleration
         Vector simpleAcc = getSimpleAcceleration(currentPosition, target, player, gameState);
         if (isMoveValid(player, simpleAcc, gameState)) {
             resetFailCount(playerName, simpleAcc);
@@ -133,8 +130,7 @@ public class SimpleStrategy implements AIStrategy {
             return simpleAcc;
         } else {
             incrementFailCount(playerName, simpleAcc);
-
-            // 3) Se supero la soglia di fallimenti, tentativo fallback random
+            // 3) Fallback: se si supera la soglia di fallimenti, scegli un'accelerazione casuale valida
             int fails = failedAttemptsCounter.getOrDefault(playerName, 0);
             if (fails >= FALLBACK_THRESHOLD) {
                 Vector fallback = chooseRandomValidAcceleration(player, gameState);
@@ -146,46 +142,37 @@ public class SimpleStrategy implements AIStrategy {
                 }
             }
         }
-
-        // 4) In extremis, resto fermo
+        // 4) Se tutto fallisce, resta fermo
         return new Vector(0, 0);
     }
 
     /**
      * Implementazione "semplice" dell'accelerazione se A* non fornisce una mossa valida.
-     * NOTA la firma: (Position current, Position target, Player player, GameState gameState).
      */
     private Vector getSimpleAcceleration(Position current,
                                         Position target,
                                         Player player,
                                         GameState gameState) {
-
         Vector currentVelocity = player.getVelocity();
         int dx = target.getX() - current.getX();
         int dy = target.getY() - current.getY();
         Vector lastDir = lastDirection.get(player.getName());
 
-        // Se siamo completamente fermi, cerchiamo la migliore accelerazione tra le 9
-        if (currentVelocity.getDx() == 0 && currentVelocity.getDy() == 0) {
+        if (currentVelocity.isZero()) {
             Vector bestAcc = null;
             double bestScore = Double.MAX_VALUE;
-
             for (Vector acc : ACCELERATIONS) {
                 Position newPos = current.move(acc);
-                // Controllo validità traiettoria
                 if (player.isPathClear(current, newPos, gameState.getTrack(), gameState)
                         && !isPositionOccupied(newPos, gameState, player)) {
                     double score = Math.abs(acc.getDx() - Integer.compare(dx, 0))
                                    + Math.abs(acc.getDy() - Integer.compare(dy, 0));
-                    // Leggera preferenza verso la lastDir
                     if (lastDir != null) {
                         if (acc.getDx() * lastDir.getDx() > 0) score -= 1.5;
                         if (acc.getDy() * lastDir.getDy() > 0) score -= 1.5;
                     }
-                    // Se l'accelerazione va verso target, preferisco
                     if (acc.getDx() * dx > 0) score -= 2;
                     if (acc.getDy() * dy > 0) score -= 2;
-
                     if (score < bestScore) {
                         bestScore = score;
                         bestAcc = acc;
@@ -195,38 +182,34 @@ public class SimpleStrategy implements AIStrategy {
             return bestAcc != null ? bestAcc : new Vector(0, 0);
         }
 
-        // Se la velocità attuale è già in linea col target, non accelero
         if ((currentVelocity.getDx() * dx >= 0 && currentVelocity.getDy() * dy >= 0)
             && Math.abs(currentVelocity.getDx()) <= 2
             && Math.abs(currentVelocity.getDy()) <= 2) {
             return new Vector(0, 0);
         }
 
-        // Altrimenti, provo a spostarmi di 1 verso dx e dy
         int targetDx = Integer.compare(dx, 0);
         int targetDy = Integer.compare(dy, 0);
         Vector proposedAcc = new Vector(targetDx, targetDy);
         Position newPos = current.move(currentVelocity.add(proposedAcc));
-
         if (player.isPathClear(current, newPos, gameState.getTrack(), gameState)
             && !isPositionOccupied(newPos, gameState, player)) {
             return proposedAcc;
         }
-
-        // Se non va, provo a frenare
-        return new Vector(
-                -Integer.compare(currentVelocity.getDx(), 0),
-                -Integer.compare(currentVelocity.getDy(), 0)
-        );
+        return new Vector(-Integer.compare(currentVelocity.getDx(), 0),
+                          -Integer.compare(currentVelocity.getDy(), 0));
     }
 
     /**
-     * findNextTarget: ignora i checkpoint di livello < nextCheckpointIndex (già superati).
+     * Seleziona il prossimo checkpoint target. <br>
+     * In questa versione si considerano **soltanto** i checkpoint il cui numero
+     * corrisponde esattamente al valore atteso (player.getNextCheckpointIndex()).
      */
     private Position findNextTarget(Player player, GameState gameState) {
         int currentCheckpointIndex = player.getNextCheckpointIndex();
         Track track = gameState.getTrack();
 
+        // Se non sono presenti checkpoint per il gruppo corrente, restituisci null
         if (!checkpointsByLevel.containsKey(currentCheckpointIndex)) {
             return null;
         }
@@ -241,18 +224,17 @@ public class SimpleStrategy implements AIStrategy {
 
         Position bestCheckpoint = null;
         double bestScore = Double.MAX_VALUE;
-
         Vector lastDir = lastDirection.get(player.getName());
         Vector currentVelocity = player.getVelocity();
 
         for (Position cp : checkpoints) {
-            // Se già superato, saltiamo
+            // Escludi i checkpoint già passati
             if (passed.contains(cp)) {
                 continue;
             }
-            // Ignora i checkpoint di livello < nextCheckpointIndex
+            // **Forza la scelta esclusiva del checkpoint del gruppo corrente**
             int checkpointNum = track.getCheckpointNumber(cp);
-            if (checkpointNum < currentCheckpointIndex) {
+            if (checkpointNum != currentCheckpointIndex) {
                 continue;
             }
 
@@ -260,20 +242,15 @@ public class SimpleStrategy implements AIStrategy {
             if (lastDir != null) {
                 int dx = cp.getX() - player.getPosition().getX();
                 int dy = cp.getY() - player.getPosition().getY();
-                double angleDiff = Math.abs(Math.atan2(dy, dx) -
-                        Math.atan2(lastDir.getDy(), lastDir.getDx()));
+                double angleDiff = Math.abs(Math.atan2(dy, dx) - Math.atan2(lastDir.getDy(), lastDir.getDx()));
                 distance += angleDiff * 20;
             }
-
             if (!isCheckpointReachable(player, cp, gameState)) {
                 continue;
             }
-
-            if (checkpointReservations.containsKey(cp)
-                    && !checkpointReservations.get(cp).equals(player.getName())) {
+            if (checkpointReservations.containsKey(cp) && !checkpointReservations.get(cp).equals(player.getName())) {
                 distance += 40;
             }
-
             if (distance < bestScore) {
                 bestScore = distance;
                 bestCheckpoint = cp;
@@ -289,13 +266,12 @@ public class SimpleStrategy implements AIStrategy {
     }
 
     /**
-     * Verifica validità di una mossa e fallback se ripetutamente rifiutata
+     * Verifica se una mossa è valida, ovvero se il percorso risultante è libero.
      */
     private boolean isMoveValid(Player player, Vector acceleration, GameState gameState) {
         Position currentPos = player.getPosition();
         Vector newVelocity = player.getVelocity().add(acceleration);
         Position nextPos = currentPos.move(newVelocity);
-
         return player.isPathClear(currentPos, nextPos, gameState.getTrack(), gameState)
                 && !isPositionOccupied(nextPos, gameState, player);
     }
@@ -327,13 +303,15 @@ public class SimpleStrategy implements AIStrategy {
         failedAttemptsCounter.put(playerName, 0);
     }
 
+    /**
+     * Rimuove dalle prenotazioni i checkpoint non più rilevanti.
+     */
     private void cleanupReservations(GameState gameState) {
         Iterator<Map.Entry<Position, String>> it = checkpointReservations.entrySet().iterator();
         while (it.hasNext()) {
             Map.Entry<Position, String> entry = it.next();
             Position checkpoint = entry.getKey();
             String pName = entry.getValue();
-
             boolean remove = true;
             for (Player p : gameState.getPlayers()) {
                 if (p.getName().equals(pName)) {
@@ -344,7 +322,6 @@ public class SimpleStrategy implements AIStrategy {
                     break;
                 }
             }
-
             if (remove) {
                 it.remove();
                 playerTargets.remove(pName);
@@ -352,6 +329,9 @@ public class SimpleStrategy implements AIStrategy {
         }
     }
 
+    /**
+     * Restituisce la cella FINISH (traguardo) del tracciato.
+     */
     private Position findFinishCell(GameState gameState) {
         Track track = gameState.getTrack();
         for (int y = 0; y < track.getHeight(); y++) {
@@ -365,25 +345,21 @@ public class SimpleStrategy implements AIStrategy {
     }
 
     /**
-     * Verifica se un checkpoint è raggiungibile (controllo base).
+     * Verifica se un checkpoint è raggiungibile.
      */
     private boolean isCheckpointReachable(Player player, Position checkpoint, GameState gameState) {
         Position current = player.getPosition();
         Vector velocity = player.getVelocity();
         int dx = checkpoint.getX() - current.getX();
         int dy = checkpoint.getY() - current.getY();
-
-        // Se la velocità punta in direzione opposta netta, scartiamo
-        if (velocity.getDx() != 0 || velocity.getDy() != 0) {
+        if (!velocity.isZero()) {
             if ((velocity.getDx() > 0 && dx < 0) ||
                 (velocity.getDx() < 0 && dx > 0) ||
                 (velocity.getDy() > 0 && dy < 0) ||
                 (velocity.getDy() < 0 && dy > 0)) {
-                // se vuoi consentire manovre "indietro", rimuovi questo check
                 return false;
             }
         }
-
         return player.isPathClear(current, checkpoint, gameState.getTrack(), gameState);
     }
 
@@ -393,15 +369,15 @@ public class SimpleStrategy implements AIStrategy {
         return Math.sqrt(dx * dx + dy * dy);
     }
 
-    private void updateOccupiedPositions(GameState gameState) {
-        occupiedPositions.clear();
-        for (Player p : gameState.getPlayers()) {
-            occupiedPositions.add(p.getPosition());
-        }
-    }
-
+    /**
+     * Calcola la mappa dei checkpoint raggruppati per livello. Dal momento che il tracciato
+     * è statico, questa operazione viene eseguita una sola volta.
+     */
     private void updateCheckpointMap(Track track) {
-        checkpointsByLevel.clear();
+        // Non cancelliamo la mappa se già inizializzata
+        if (!checkpointsByLevel.isEmpty()) {
+            return;
+        }
         for (int y = 0; y < track.getHeight(); y++) {
             for (int x = 0; x < track.getWidth(); x++) {
                 if (track.getCell(x, y) == CellType.CHECKPOINT) {
@@ -413,9 +389,16 @@ public class SimpleStrategy implements AIStrategy {
         }
     }
 
+    private void updateOccupiedPositions(GameState gameState) {
+        occupiedPositions.clear();
+        for (Player p : gameState.getPlayers()) {
+            occupiedPositions.add(p.getPosition());
+        }
+    }
+
     /**
-     * A* per trovare un path di massima verso il target
-     * con euristica che penalizza differenza angolare.
+     * Algoritmo A* per trovare un percorso verso il target, utilizzando un'euristica
+     * che penalizza la differenza angolare.
      */
     private VectorRacePathState findPath(Player player, GameState gameState, Position target) {
         PriorityQueue<VectorRacePathState> openSet = new PriorityQueue<>();
@@ -436,16 +419,13 @@ public class SimpleStrategy implements AIStrategy {
             for (Vector acc : ACCELERATIONS) {
                 Vector newVelocity = current.getVelocity().add(acc);
                 Position newPosition = current.getPosition().move(newVelocity);
-
                 if (!player.isPathClear(current.getPosition(), newPosition, gameState.getTrack(), gameState)) {
                     continue;
                 }
-
                 VectorRacePathState neighbor = new VectorRacePathState(newPosition, newVelocity, current);
                 if (closedSet.contains(neighbor)) {
                     continue;
                 }
-
                 double tentativeG = current.getG() + 1;
                 if (!openSet.contains(neighbor) || tentativeG < neighbor.getG()) {
                     neighbor.setG(tentativeG);
@@ -460,16 +440,14 @@ public class SimpleStrategy implements AIStrategy {
     }
 
     /**
-     * Euristica = distanza + penalità angolare
+     * Calcola l'euristica come somma della distanza euclidea e di una penalità angolare.
      */
     private double computeHeuristic(Position pos, Vector velocity, Position target) {
         double dist = calculateDistance(pos, target);
         double anglePenalty = 0.0;
-        if (velocity.getDx() != 0 || velocity.getDy() != 0) {
+        if (!velocity.isZero()) {
             double angleVel = Math.atan2(velocity.getDy(), velocity.getDx());
-            double angleCheckpoint = Math.atan2(
-                    target.getY() - pos.getY(),
-                    target.getX() - pos.getX());
+            double angleCheckpoint = Math.atan2(target.getY() - pos.getY(), target.getX() - pos.getX());
             double diff = Math.abs(angleVel - angleCheckpoint);
             if (diff > Math.PI) {
                 diff = 2 * Math.PI - diff;
@@ -480,23 +458,20 @@ public class SimpleStrategy implements AIStrategy {
     }
 
     /**
-     * checkCrossedCheckpoint: quando supero un checkpoint col numero nextCheckpointIndex,
-     * incremento l'indice, rimuovo le prenotazioni di quel gruppo e tolgo il target.
+     * Metodo che controlla se lungo il percorso (tratto con l'algoritmo Bresenham)
+     * il giocatore ha superato il checkpoint atteso. In tal caso, aggiorna l'indice.
      */
     private void checkCrossedCheckpoint(Player player, Position oldPos, Position newPos, GameState gameState) {
         Track track = gameState.getTrack();
         int x1 = oldPos.getX(), y1 = oldPos.getY();
         int x2 = newPos.getX(), y2 = newPos.getY();
-
         int dx = Math.abs(x2 - x1);
         int dy = Math.abs(y2 - y1);
         int sx = (x1 < x2) ? 1 : -1;
         int sy = (y1 < y2) ? 1 : -1;
         int err = dx - dy;
-
         int x = x1, y = y1;
         Set<Position> passed = passedCheckpoints.computeIfAbsent(player.getName(), k -> new HashSet<>());
-
         int currentIndex = player.getNextCheckpointIndex();
 
         while (true) {
@@ -508,15 +483,13 @@ public class SimpleStrategy implements AIStrategy {
                     // Avanza al checkpoint successivo
                     player.incrementCheckpointIndex();
                     removeAllCheckpointReservationsForIndex(currentIndex, player.getName(), track);
-                    // Forza un nuovo findNextTarget
                     playerTargets.remove(player.getName());
-                    return; 
+                    return;
                 }
             }
             if (x == x2 && y == y2) {
                 break;
             }
-
             int e2 = 2 * err;
             if (e2 > -dy) {
                 err -= dy;
@@ -530,7 +503,7 @@ public class SimpleStrategy implements AIStrategy {
     }
 
     /**
-     * Rimuove le prenotazioni di tutto il gruppo "checkpointIndex" del bot "playerName".
+     * Rimuove dalle prenotazioni tutti i checkpoint appartenenti al gruppo specificato per il giocatore.
      */
     private void removeAllCheckpointReservationsForIndex(int checkpointIndex, String playerName, Track track) {
         Iterator<Map.Entry<Position, String>> it = checkpointReservations.entrySet().iterator();
@@ -538,7 +511,6 @@ public class SimpleStrategy implements AIStrategy {
             Map.Entry<Position, String> entry = it.next();
             Position cpPos = entry.getKey();
             String cpPlayer = entry.getValue();
-
             if (cpPlayer.equals(playerName)) {
                 if (track.getCell(cpPos.getX(), cpPos.getY()) == CellType.CHECKPOINT) {
                     int cpLevel = track.getCheckpointNumber(cpPos);

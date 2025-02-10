@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.HashSet;
 import java.util.Set;
+import it.unicam.cs.mdp.vectorrace.model.SimpleStrategy;
 
 /**
  * Classe astratta che rappresenta un giocatore (umano o bot).
@@ -80,98 +81,121 @@ public abstract class Player {
      * @param gameState    stato del gioco corrente
      * @return true se il movimento è valido ed è stato eseguito, false altrimenti
      */
+    // public boolean move(Vector acceleration, GameState gameState) {
+    //     Vector newVelocity = velocity.add(acceleration);
+    //     Position newPosition = position.move(newVelocity);
+    //     Track track = gameState.getTrack();
+    //     boolean isStuck = velocity.getDx() == 0 && velocity.getDy() == 0;
+
+    //     // Logged per debug
+    //     if (this instanceof BotPlayer) {
+    //         BotPlayer bot = (BotPlayer) this;
+    //         bot.logDebug("Tentativo movimento: Posizione attuale=" + position +
+    //                 ", Nuova posizione=" + newPosition +
+    //                 ", Nuova velocità=" + newVelocity);
+    //     }
+
+    //     // Verifica confini
+    //     if (newPosition.getX() < 0 || newPosition.getX() >= track.getWidth() ||
+    //             newPosition.getY() < 0 || newPosition.getY() >= track.getHeight()) {
+    //         if (this instanceof BotPlayer) {
+    //             ((BotPlayer) this).logDebug("Movimento rifiutato: fuori dai confini");
+    //         }
+    //         return false;
+    //     }
+
+    //     // Meccanismo di emergenza: se il bot è bloccato e ha provato più volte,
+    //     // ignora completamente le collisioni e permetti il movimento se non va contro
+    //     // un muro
+    //     if (isStuck && this instanceof BotPlayer) {
+    //         BotPlayer bot = (BotPlayer) this;
+    //         int stuckCount = ((SimpleStrategy) bot.getStrategy()).getStuckCounter(getName());
+
+    //         if (stuckCount >= 5) {
+    //             // Verifica solo collisione con muri
+    //             if (track.getCell(newPosition.getX(), newPosition.getY()) != CellType.WALL) {
+    //                 bot.logDebug("Attivato movimento di emergenza dopo " + stuckCount + " tentativi");
+    //                 velocity = newVelocity;
+    //                 position = newPosition;
+    //                 movementHistory.add(position);
+    //                 checkCrossedCheckpoints(position, newPosition, track);
+    //                 return true;
+    //             } else {
+    //                 bot.logDebug("Movimento di emergenza bloccato da muro");
+    //             }
+    //         }
+    //     }
+
+    //     // Verifica collisioni standard
+    //     if (!isPathClear(position, newPosition, track, gameState)) {
+    //         if (this instanceof BotPlayer) {
+    //             BotPlayer bot = (BotPlayer) this;
+    //             bot.logDebug("Movimento rifiutato: percorso non libero");
+    //             // Log dettagli percorso
+    //             bot.logDebug("Dettagli percorso - Start: " + position + ", End: " + newPosition);
+
+    //             // Verifica e log ostacoli specifici
+    //             int dx = newPosition.getX() - position.getX();
+    //             int dy = newPosition.getY() - position.getY();
+    //             int steps = Math.max(Math.abs(dx), Math.abs(dy));
+    //             float xInc = (float) dx / steps;
+    //             float yInc = (float) dy / steps;
+
+    //             float x = position.getX();
+    //             float y = position.getY();
+    //             for (int i = 1; i <= steps; i++) {
+    //                 int checkX = Math.round(x + xInc * i);
+    //                 int checkY = Math.round(y + yInc * i);
+    //                 if (track.getCell(checkX, checkY) == CellType.WALL) {
+    //                     bot.logDebug("Trovato muro in: (" + checkX + "," + checkY + ")");
+    //                 }
+    //                 for (Player other : gameState.getPlayers()) {
+    //                     if (!other.getName().equals(getName()) &&
+    //                             other.getPosition().equals(new Position(checkX, checkY))) {
+    //                         bot.logDebug(
+    //                                 "Trovato giocatore " + other.getName() + " in: (" + checkX + "," + checkY + ")");
+    //                     }
+    //                 }
+    //             }
+    //         }
+    //         return false;
+    //     }
+
+    //     // Esegui il movimento
+    //     velocity = newVelocity;
+    //     position = newPosition;
+    //     movementHistory.add(position);
+    //     checkCrossedCheckpoints(position, newPosition, track);
+
+    //     if (this instanceof BotPlayer) {
+    //         ((BotPlayer) this).logDebug("Movimento eseguito con successo");
+    //     }
+
+    //     return true;
+    // }
+
+
     public boolean move(Vector acceleration, GameState gameState) {
         Vector newVelocity = velocity.add(acceleration);
         Position newPosition = position.move(newVelocity);
         Track track = gameState.getTrack();
-        boolean isStuck = velocity.getDx() == 0 && velocity.getDy() == 0;
-
-        // Logged per debug
-        if (this instanceof BotPlayer) {
-            BotPlayer bot = (BotPlayer) this;
-            bot.logDebug("Tentativo movimento: Posizione attuale=" + position +
-                    ", Nuova posizione=" + newPosition +
-                    ", Nuova velocità=" + newVelocity);
-        }
-
-        // Verifica confini
-        if (newPosition.getX() < 0 || newPosition.getX() >= track.getWidth() ||
-                newPosition.getY() < 0 || newPosition.getY() >= track.getHeight()) {
-            if (this instanceof BotPlayer) {
-                ((BotPlayer) this).logDebug("Movimento rifiutato: fuori dai confini");
-            }
-            return false;
-        }
-
-        // Meccanismo di emergenza: se il bot è bloccato e ha provato più volte,
-        // ignora completamente le collisioni e permetti il movimento se non va contro
-        // un muro
-        if (isStuck && this instanceof BotPlayer) {
-            BotPlayer bot = (BotPlayer) this;
-            int stuckCount = ((SimpleStrategy) bot.getStrategy()).getStuckCounter(getName());
-
-            if (stuckCount >= 5) {
-                // Verifica solo collisione con muri
-                if (track.getCell(newPosition.getX(), newPosition.getY()) != CellType.WALL) {
-                    bot.logDebug("Attivato movimento di emergenza dopo " + stuckCount + " tentativi");
-                    velocity = newVelocity;
-                    position = newPosition;
-                    movementHistory.add(position);
-                    checkCrossedCheckpoints(position, newPosition, track);
-                    return true;
-                } else {
-                    bot.logDebug("Movimento di emergenza bloccato da muro");
-                }
-            }
-        }
-
-        // Verifica collisioni standard
+    
+        // Verifica confini e altre collisioni (come da logica esistente)...
         if (!isPathClear(position, newPosition, track, gameState)) {
-            if (this instanceof BotPlayer) {
-                BotPlayer bot = (BotPlayer) this;
-                bot.logDebug("Movimento rifiutato: percorso non libero");
-                // Log dettagli percorso
-                bot.logDebug("Dettagli percorso - Start: " + position + ", End: " + newPosition);
-
-                // Verifica e log ostacoli specifici
-                int dx = newPosition.getX() - position.getX();
-                int dy = newPosition.getY() - position.getY();
-                int steps = Math.max(Math.abs(dx), Math.abs(dy));
-                float xInc = (float) dx / steps;
-                float yInc = (float) dy / steps;
-
-                float x = position.getX();
-                float y = position.getY();
-                for (int i = 1; i <= steps; i++) {
-                    int checkX = Math.round(x + xInc * i);
-                    int checkY = Math.round(y + yInc * i);
-                    if (track.getCell(checkX, checkY) == CellType.WALL) {
-                        bot.logDebug("Trovato muro in: (" + checkX + "," + checkY + ")");
-                    }
-                    for (Player other : gameState.getPlayers()) {
-                        if (!other.getName().equals(getName()) &&
-                                other.getPosition().equals(new Position(checkX, checkY))) {
-                            bot.logDebug(
-                                    "Trovato giocatore " + other.getName() + " in: (" + checkX + "," + checkY + ")");
-                        }
-                    }
-                }
-            }
             return false;
         }
-
-        // Esegui il movimento
+    
         velocity = newVelocity;
         position = newPosition;
         movementHistory.add(position);
-        checkCrossedCheckpoints(position, newPosition, track);
-
-        if (this instanceof BotPlayer) {
-            ((BotPlayer) this).logDebug("Movimento eseguito con successo");
+        
+        // Se il giocatore è un bot che usa SimpleStrategy, il controllo dei checkpoint viene gestito dalla strategia
+        if (!(this instanceof BotPlayer && ((BotPlayer)this).getStrategy() instanceof SimpleStrategy)) {
+            checkCrossedCheckpoints(position, newPosition, track);
         }
-
         return true;
     }
+    
 
     /**
      * Verifica se il percorso è libero da ostacoli e altri giocatori
@@ -278,18 +302,18 @@ public abstract class Player {
         }
     }
 
-    /**
-     * @deprecated Use move(Vector acceleration, GameState gameState) instead
-     */
-    @Deprecated
-    public void move(Vector acceleration) {
-        // Per retrocompatibilità, ma non dovrebbe essere più usato
-        velocity = velocity.add(acceleration);
-        Position oldPosition = position;
-        position = position.move(velocity);
-        movementHistory.add(position);
-        // Note: i checkpoint non vengono controllati in questa versione
-    }
+    // /**
+    //  * @deprecated Use move(Vector acceleration, GameState gameState) instead
+    //  */
+    // @Deprecated
+    // public void move(Vector acceleration) {
+    //     // Per retrocompatibilità, ma non dovrebbe essere più usato
+    //     velocity = velocity.add(acceleration);
+    //     Position oldPosition = position;
+    //     position = position.move(velocity);
+    //     movementHistory.add(position);
+    //     // Note: i checkpoint non vengono controllati in questa versione
+    // }
 
     /**
      * Resetta la velocità del giocatore a (0, 0).
