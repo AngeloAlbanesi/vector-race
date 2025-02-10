@@ -191,7 +191,11 @@ public class GameController {
 
                 // Verifica se ha raggiunto il traguardo
                 if (track.getCell(newPosition.getX(), newPosition.getY()) == CellType.FINISH) {
-                    cliView.displayMessage(currentPlayer.getName() + " ha raggiunto il traguardo!");
+                    gameState.setFinished(true);
+                    gameState.setWinner(currentPlayer);
+                    cliView.displayMessage("Il Giocatore " + currentPlayer.getName() + " ha vinto la gara!");
+                    cliView.displayGameState(gameState);
+                    return;
                 }
             }
         }
@@ -200,7 +204,8 @@ public class GameController {
         if (gameState.checkFinish(currentPlayer)) {
             gameState.setFinished(true);
             gameState.setWinner(currentPlayer);
-            cliView.displayMessage("Vincitore: " + currentPlayer.getName());
+            cliView.displayMessage("Il Giocatore " + currentPlayer.getName() + " ha vinto la gara!");
+            cliView.displayGameState(gameState);
             return;
         }
 

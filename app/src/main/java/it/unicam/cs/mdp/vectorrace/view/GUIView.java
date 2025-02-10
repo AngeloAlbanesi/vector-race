@@ -15,6 +15,7 @@ import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.Slider;
@@ -174,7 +175,20 @@ public class GUIView extends Application {
                 // Check se ha raggiunto FINISH
                 CellType currentCell = track.getCell(newPosition.getX(), newPosition.getY());
                 if (currentCell == CellType.FINISH) {
-                    statusLabel.setText(currentPlayer.getName() + " ha raggiunto il traguardo!");
+                    gameState.setFinished(true);
+                    gameState.setWinner(currentPlayer);
+                    statusLabel.setText("Il Giocatore " + currentPlayer.getName() + " ha vinto la gara!");
+                    timeline.stop();
+
+                    // Mostra dialog di vittoria e chiudi l'applicazione
+                    Platform.runLater(() -> {
+                        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                        alert.setTitle("Fine della gara");
+                        alert.setHeaderText("Vittoria!");
+                        alert.setContentText("Il Giocatore " + currentPlayer.getName() + " ha vinto la gara!");
+                        alert.showAndWait().ifPresent(response -> Platform.exit());
+                    });
+                    return;
                 }
             }
         }
@@ -183,8 +197,17 @@ public class GUIView extends Application {
         if (gameState.checkFinish(currentPlayer)) {
             gameState.setFinished(true);
             gameState.setWinner(currentPlayer);
-            statusLabel.setText("Vincitore: " + currentPlayer.getName());
-            timeline.stop(); // Ferma l'animazione
+            statusLabel.setText("Il Giocatore " + currentPlayer.getName() + " ha vinto la gara!");
+            timeline.stop();
+
+            // Mostra dialog di vittoria e chiudi l'applicazione
+            Platform.runLater(() -> {
+                Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                alert.setTitle("Fine della gara");
+                alert.setHeaderText("Vittoria!");
+                alert.setContentText("Il Giocatore " + currentPlayer.getName() + " ha vinto la gara!");
+                alert.showAndWait().ifPresent(response -> Platform.exit());
+            });
             return;
         }
 

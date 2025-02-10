@@ -127,12 +127,21 @@ public class Main extends Application {
             switch (choice) {
                 case 1: // Avvia simulazione automatica
                     runSimulation(controller, cliView);
+                    // Se il gioco è finito, termina
+                    if (controller.getGameState().isFinished()) {
+                        return false;
+                    }
                     return true;
                 case 2: // Avanza di un turno
                     if (!controller.getGameState().isFinished()) {
                         controller.advanceTurn();
+                        // Se il gioco è finito dopo questo turno, termina
+                        if (controller.getGameState().isFinished()) {
+                            return false;
+                        }
                     } else {
                         System.out.println("La gara è già terminata!");
+                        return false;
                     }
                     return true;
                 case 3: // Esci
@@ -162,6 +171,13 @@ public class Main extends Application {
             view.setGameRunning(false);
         });
         simulationThread.start();
+
+        // Aspetta che la simulazione termini
+        try {
+            simulationThread.join();
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
     }
 
     @Override

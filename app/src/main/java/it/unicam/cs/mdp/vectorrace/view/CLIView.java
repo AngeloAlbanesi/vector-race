@@ -110,7 +110,15 @@ public class CLIView {
         if (gameState.isFinished()) {
             Player winner = gameState.getWinner();
             if (winner != null) {
-                System.out.println("\n🏆 VINCITORE: " + winner.getName() + " 🏆");
+                System.out.println("\n🏆 Il Giocatore " + winner.getName() + " ha vinto la gara! 🏆");
+                // Aspetta un secondo per assicurarsi che l'utente veda il messaggio
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
+                // Forza la terminazione del programma
+                System.exit(0);
             }
         }
     }
