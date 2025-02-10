@@ -1,3 +1,3 @@
-# Formato: Tipo;Nome;Colore (HEX);Strategia (1=simplestrategy, 2=BFS)
+# Formato: Tipo;Nome;Colore (HEX);Strategia (1=BFS, 2=PureAStarStrategy)
 Bot;CPU 1;0000FF;1
-Bot;CPU 2;FFFF00;1
+Bot;CPU 2;FFFF00;2

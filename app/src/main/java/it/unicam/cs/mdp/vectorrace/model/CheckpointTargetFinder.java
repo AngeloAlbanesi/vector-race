@@ -2,11 +2,19 @@ package it.unicam.cs.mdp.vectorrace.model;
 
 import java.util.*;
 
+/**
+ * Classe che determina la cella "target" (il checkpoint successivo o il traguardo)
+ * per un giocatore.
+ */
 public class CheckpointTargetFinder {
+
     private final Map<Integer, Set<Position>> checkpointsByLevel = new HashMap<>();
     private final Map<String, Position> playerTargets = new HashMap<>();
     private boolean checkpointsMapInitialized = false;
 
+    /**
+     * Restituisce la prossima posizione di checkpoint (o finish) che il giocatore deve raggiungere.
+     */
     public Position findNextTarget(Player player, GameState gameState) {
         if (!checkpointsMapInitialized) {
             updateCheckpointMap(gameState.getTrack());
@@ -15,58 +23,55 @@ public class CheckpointTargetFinder {
         int currentCheckpointIndex = player.getNextCheckpointIndex();
         Track track = gameState.getTrack();
 
-        // Se non ci sono checkpoint per il livello corrente, prova con il traguardo
+        // Se abbiamo superato il numero massimo di checkpoint, puntiamo al FINISH
+        int maxCheckpoint = track.getMaxCheckpoint();
+        if (currentCheckpointIndex > maxCheckpoint) {
+            return findFinishCell(track);
+        }
+
+        // Se per qualche motivo non troviamo checkpoint con quell'indice, andiamo al FINISH
         if (!checkpointsByLevel.containsKey(currentCheckpointIndex)) {
             return findFinishCell(track);
         }
 
+        // Tutte le celle del checkpoint 'currentCheckpointIndex'
         Set<Position> checkpoints = checkpointsByLevel.get(currentCheckpointIndex);
-        Position currentTarget = playerTargets.get(player.getName());
 
-        // Se il target corrente è ancora valido, mantienilo
+        // Verifichiamo se il giocatore ha già un target valido in memoria
+        Position currentTarget = playerTargets.get(player.getName());
         if (currentTarget != null && checkpoints.contains(currentTarget)) {
             return currentTarget;
         }
 
-        // Cerca il miglior checkpoint disponibile
+        // Altrimenti, scegliamo la cella checkpoint più vicina
         Position bestCheckpoint = null;
-        double bestScore = Double.MAX_VALUE;
-
+        double bestDist = Double.MAX_VALUE;
         for (Position cp : checkpoints) {
-            double distance = calculateDistance(player.getPosition(), cp);
-
-            // Considera la direzione attuale del movimento
-            Vector velocity = player.getVelocity();
-            if (!velocity.isZero()) {
-                int dx = cp.getX() - player.getPosition().getX();
-                int dy = cp.getY() - player.getPosition().getY();
-                double angleDiff = Math.abs(Math.atan2(dy, dx) - Math.atan2(velocity.getDy(), velocity.getDx()));
-                distance += angleDiff * 20;
-            }
-
-            if (distance < bestScore) {
-                bestScore = distance;
+            double dist = cp.distanceTo(player.getPosition());
+            if (dist < bestDist) {
+                bestDist = dist;
                 bestCheckpoint = cp;
             }
         }
 
-        if (bestCheckpoint != null) {
-            playerTargets.put(player.getName(), bestCheckpoint);
-            return bestCheckpoint;
+        // Se non c'è nessun checkpoint valido, fallback al finish
+        if (bestCheckpoint == null) {
+            return findFinishCell(track);
         }
 
-        return findFinishCell(track);
+        // Salviamo come target e restituiamo
+        playerTargets.put(player.getName(), bestCheckpoint);
+        return bestCheckpoint;
     }
 
     private void updateCheckpointMap(Track track) {
-        if (!checkpointsByLevel.isEmpty()) {
-            return;
-        }
+        checkpointsByLevel.clear();
         for (int y = 0; y < track.getHeight(); y++) {
             for (int x = 0; x < track.getWidth(); x++) {
                 if (track.getCell(x, y) == CellType.CHECKPOINT) {
-                    int level = track.getCheckpointNumber(new Position(x, y));
-                    checkpointsByLevel.computeIfAbsent(level, k -> new HashSet<>())
+                    int checkpointNumber = track.getCheckpointNumber(new Position(x, y));
+                    checkpointsByLevel
+                            .computeIfAbsent(checkpointNumber, k -> new HashSet<>())
                             .add(new Position(x, y));
                 }
             }
@@ -83,11 +88,5 @@ public class CheckpointTargetFinder {
             }
         }
         return null;
-    }
-
-    private double calculateDistance(Position a, Position b) {
-        int dx = b.getX() - a.getX();
-        int dy = b.getY() - a.getY();
-        return Math.sqrt(dx * dx + dy * dy);
     }
 }

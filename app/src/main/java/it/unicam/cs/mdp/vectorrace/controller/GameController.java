@@ -99,9 +99,18 @@ public class GameController {
                             // Usa default
                         }
                     }
-                    AIStrategy strategy = (strategyType == 2)
-                            ? new BFSStrategy()
-                            : new SimpleStrategy(); // Usa SimpleStrategy
+                    AIStrategy strategy;
+                    switch (strategyType) {
+                        case 1:
+                            strategy = new BFSStrategy();
+                            break;
+                        case 2:
+                            strategy = new PureAStarStrategy();
+                            break;
+                        default:
+                            strategy = new BFSStrategy();
+                            break;
+                    }
                     players.add(new BotPlayer(name, color, startPos, strategy));
                 }
             }
