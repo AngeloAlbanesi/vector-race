@@ -221,6 +221,7 @@ public class GUIView extends Application {
                         fill = Color.BLACK;
                         break;
                     case ROAD:
+                    case CHECKPOINT:
                         fill = Color.LIGHTGRAY;
                         break;
                     case START:
@@ -228,9 +229,6 @@ public class GUIView extends Application {
                         break;
                     case FINISH:
                         fill = Color.LIGHTCORAL;
-                        break;
-                    case CHECKPOINT:
-                        fill = Color.LIGHTBLUE;
                         break;
                     default:
                         fill = Color.WHITE;
@@ -242,15 +240,6 @@ public class GUIView extends Application {
                 // Bordo cella
                 gc.setStroke(Color.BLACK);
                 gc.strokeRect(x * cellSize, y * cellSize, cellSize, cellSize);
-
-                // Numerino per i checkpoint
-                if (cell == CellType.CHECKPOINT) {
-                    gc.setFill(Color.BLACK);
-                    int checkpointNum = getCheckpointNumber(track, x, y);
-                    gc.fillText(String.valueOf(checkpointNum),
-                            x * cellSize + cellSize / 3,
-                            y * cellSize + cellSize / 2);
-                }
             }
         }
 
@@ -264,76 +253,6 @@ public class GUIView extends Application {
             gc.fillOval(pos.getX() * cellSize + 2,
                     pos.getY() * cellSize + 2,
                     cellSize - 4, cellSize - 4);
-
-            // Mostra il prossimo checkpoint
-            gc.setFill(Color.BLACK);
-            gc.fillText(String.valueOf(player.getNextCheckpointIndex()),
-                    pos.getX() * cellSize + cellSize / 3,
-                    pos.getY() * cellSize + cellSize / 2);
         }
-    }
-
-    /**
-     * Restituisce un numero fittizio per il checkpoint (solo per disegno),
-     * se la logica del circuito ha definito un'ordinazione. Rimane il tuo codice
-     * esistente.
-     */
-    private int getCheckpointNumber(Track track, int x, int y) {
-        // Ordina i checkpoint da sinistra a destra (logica fittizia esistente)
-        int checkpointIndex = 0;
-        boolean found = false;
-
-        // Prima riga (checkpoint 1)
-        for (int col = 0; col < track.getWidth() && !found; col++) {
-            for (int row = 0; row < track.getHeight(); row++) {
-                if (track.getCell(col, row) == CellType.CHECKPOINT) {
-                    if (col == x && row == y) {
-                        return checkpointIndex + 1;
-                    }
-                    checkpointIndex++;
-                    break;
-                }
-            }
-        }
-
-        // Seconda riga (checkpoint 2)
-        for (int col = 0; col < track.getWidth() && !found; col++) {
-            for (int row = track.getHeight() - 1; row >= 0; row--) {
-                if (track.getCell(col, row) == CellType.CHECKPOINT) {
-                    if (col == x && row == y) {
-                        return checkpointIndex + 1;
-                    }
-                    checkpointIndex++;
-                    break;
-                }
-            }
-        }
-
-        // Terza riga (checkpoint 3)
-        for (int col = track.getWidth() - 1; col >= 0 && !found; col--) {
-            for (int row = track.getHeight() - 1; row >= 0; row--) {
-                if (track.getCell(col, row) == CellType.CHECKPOINT) {
-                    if (col == x && row == y) {
-                        return checkpointIndex + 1;
-                    }
-                    checkpointIndex++;
-                    break;
-                }
-            }
-        }
-
-        // Ultima riga (checkpoint 4)
-        for (int col = track.getWidth() - 1; col >= 0 && !found; col--) {
-            for (int row = 0; row < track.getHeight(); row++) {
-                if (track.getCell(col, row) == CellType.CHECKPOINT) {
-                    if (col == x && row == y) {
-                        return checkpointIndex + 1;
-                    }
-                    checkpointIndex++;
-                    break;
-                }
-            }
-        }
-        return checkpointIndex + 1;
     }
 }
