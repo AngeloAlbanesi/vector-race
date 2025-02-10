@@ -16,7 +16,7 @@ public class BFSStrategy implements AIStrategy {
         new Vector(1, -1),  new Vector(1, 0),  new Vector(1, 1)
     };
     // Limite di velocità
-    private static final int MAX_SPEED = 7;
+    private static final int MAX_SPEED = 4;
 
     private final CheckpointTargetFinder targetFinder = new CheckpointTargetFinder();
     private final CheckpointManager checkpointManager = new CheckpointManager();

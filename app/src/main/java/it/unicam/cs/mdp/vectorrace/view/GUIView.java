@@ -123,7 +123,6 @@ public class GUIView extends Application {
         timeline = new Timeline(new KeyFrame(Duration.seconds(1.0 / speedSlider.getValue()), e -> {
             if (!isPaused && !gameState.isFinished()) {
                 advanceTurn();
-                draw();
             }
         }));
         timeline.setCycleCount(Timeline.INDEFINITE);
@@ -135,6 +134,12 @@ public class GUIView extends Application {
 
         // Aggiungi event handler per il mouse sul canvas
         canvas.setOnMouseClicked(e -> handleMouseClick(e.getX(), e.getY()));
+
+        // Inizializza le mosse valide se il primo giocatore è umano
+        if (gameState.getCurrentPlayer() instanceof HumanPlayer) {
+            HumanPlayer humanPlayer = (HumanPlayer) gameState.getCurrentPlayer();
+            validMoves = humanPlayer.calculateValidMoves(gameState);
+        }
 
         Scene scene = new Scene(root);
         primaryStage.setTitle("Vector Rally - Simulazione");
@@ -154,13 +159,6 @@ public class GUIView extends Application {
             int gridY = (int) (mouseY / cellSize);
             Position clickedPos = new Position(gridX, gridY);
 
-            // Se è la prima mossa del turno, calcola le mosse valide
-            if (validMoves.isEmpty()) {
-                validMoves = humanPlayer.calculateValidMoves(gameState);
-                draw(); // Ridisegna per mostrare le mosse valide
-                return;
-            }
-
             // Se la posizione cliccata è una mossa valida
             if (validMoves.contains(clickedPos)) {
                 // Calcola l'accelerazione necessaria per raggiungere la posizione
@@ -174,10 +172,7 @@ public class GUIView extends Application {
 
                 // Esegui la mossa
                 advanceTurn();
-                validMoves.clear();
             }
-
-            draw();
         }
     }
 
@@ -257,6 +252,16 @@ public class GUIView extends Application {
 
         // Passa turno
         gameState.nextTurn();
+        
+        // Aggiorna le mosse valide se il prossimo giocatore è umano
+        if (gameState.getCurrentPlayer() instanceof HumanPlayer) {
+            HumanPlayer humanPlayer = (HumanPlayer) gameState.getCurrentPlayer();
+            validMoves = humanPlayer.calculateValidMoves(gameState);
+        } else {
+            validMoves.clear();
+        }
+
+        draw();
     }
 
     /**
