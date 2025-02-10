@@ -38,11 +38,10 @@ public class CLIView {
      * Mostra il menu principale del gioco.
      */
     public void showGameMenu() {
-        System.out.println("\n=== Menu Gioco ===");
+        System.out.println("\n=== Menu di Gioco ===");
         System.out.println("1. Avvia simulazione");
         System.out.println("2. Avanza di un turno");
-        System.out.println("3. Esci");
-        System.out.print("Seleziona un'opzione (1-3): ");
+        System.out.print("Seleziona un'opzione (1-2): ");
         System.out.flush(); // Forza l'output immediato
     }
 
