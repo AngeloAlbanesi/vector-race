@@ -101,11 +101,10 @@ public class GameController {
                 }
 
                 String[] parts = line.split(";");
-                if (parts.length >= 4) {
+                if (parts.length >= 3) { // Cambiato da 4 a 3 per supportare i giocatori umani
                     String tipo = parts[0].trim();
                     String name = parts[1].trim();
                     String colorHex = parts[2].trim();
-                    int strategia = Integer.parseInt(parts[3].trim());
 
                     try {
                         // Converti il colore da hex a RGB
@@ -119,22 +118,30 @@ public class GameController {
                         Position startPos = startPositions.get(startPosIndex++);
                         System.out.println("Creazione giocatore: " + name + " in posizione " + startPos);
 
-                        // Crea il giocatore con la strategia appropriata
+                        // Crea il giocatore in base al tipo
                         Player player;
-                        if (strategia == 1) {
-                            player = new BotPlayer(name, color, startPos, new BFSStrategy());
-                        } else if (strategia == 2) {
-                            player = new BotPlayer(name, color, startPos, new PureAStarStrategy());
+                        if (tipo.equalsIgnoreCase("Human")) {
+                            player = new HumanPlayer(name, color, startPos);
+                        } else if (tipo.equalsIgnoreCase("Bot")) {
+                            int strategia = Integer.parseInt(parts[3].trim());
+                            if (strategia == 1) {
+                                player = new BotPlayer(name, color, startPos, new BFSStrategy());
+                            } else if (strategia == 2) {
+                                player = new BotPlayer(name, color, startPos, new PureAStarStrategy());
+                            } else {
+                                System.err.println(
+                                        "Strategia non valida per il giocatore " + name + ", uso BFS di default");
+                                player = new BotPlayer(name, color, startPos, new BFSStrategy());
+                            }
                         } else {
-                            System.err
-                                    .println("Strategia non valida per il giocatore " + name + ", uso BFS di default");
-                            player = new BotPlayer(name, color, startPos, new BFSStrategy());
+                            System.err.println("Tipo giocatore non valido: " + tipo + ", ignoro la riga");
+                            continue;
                         }
                         players.add(player);
 
                     } catch (NumberFormatException e) {
                         System.err.println(
-                                "Errore nel parsing della strategia per il giocatore " + name + ": " + e.getMessage());
+                                "Errore nel parsing dei dati per il giocatore " + name + ": " + e.getMessage());
                         e.printStackTrace();
                     }
                 } else {

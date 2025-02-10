@@ -2,6 +2,7 @@ package it.unicam.cs.mdp.vectorrace.view;
 
 import it.unicam.cs.mdp.vectorrace.model.CellType;
 import it.unicam.cs.mdp.vectorrace.model.GameState;
+import it.unicam.cs.mdp.vectorrace.model.HumanPlayer;
 import it.unicam.cs.mdp.vectorrace.model.Player;
 import it.unicam.cs.mdp.vectorrace.model.Position;
 import it.unicam.cs.mdp.vectorrace.model.Track;
@@ -27,6 +28,9 @@ import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 
+import java.util.HashSet;
+import java.util.Set;
+
 /**
  * Interfaccia grafica realizzata con JavaFX per la simulazione del gioco.
  */
@@ -39,6 +43,7 @@ public class GUIView extends Application {
     private boolean isPaused = true;
     private int cellSize = 15; // Ridotto da 30 a 15 per celle più piccole
     private final MovementManager movementManager = new MovementManager();
+    private Set<Position> validMoves = new HashSet<>();
 
     /**
      * Imposta lo stato di gioco da visualizzare.
@@ -128,6 +133,9 @@ public class GUIView extends Application {
             timeline.setRate(newVal.doubleValue());
         });
 
+        // Aggiungi event handler per il mouse sul canvas
+        canvas.setOnMouseClicked(e -> handleMouseClick(e.getX(), e.getY()));
+
         Scene scene = new Scene(root);
         primaryStage.setTitle("Vector Rally - Simulazione");
         primaryStage.setScene(scene);
@@ -135,6 +143,42 @@ public class GUIView extends Application {
         primaryStage.show();
 
         draw(); // Disegna lo stato iniziale
+    }
+
+    private void handleMouseClick(double mouseX, double mouseY) {
+        if (isPaused && gameState.getCurrentPlayer() instanceof HumanPlayer) {
+            HumanPlayer humanPlayer = (HumanPlayer) gameState.getCurrentPlayer();
+
+            // Converti le coordinate del mouse in coordinate della griglia
+            int gridX = (int) (mouseX / cellSize);
+            int gridY = (int) (mouseY / cellSize);
+            Position clickedPos = new Position(gridX, gridY);
+
+            // Se è la prima mossa del turno, calcola le mosse valide
+            if (validMoves.isEmpty()) {
+                validMoves = humanPlayer.calculateValidMoves(gameState);
+                draw(); // Ridisegna per mostrare le mosse valide
+                return;
+            }
+
+            // Se la posizione cliccata è una mossa valida
+            if (validMoves.contains(clickedPos)) {
+                // Calcola l'accelerazione necessaria per raggiungere la posizione
+                Position currentPos = humanPlayer.getPosition();
+                Vector currentVel = humanPlayer.getVelocity();
+                Vector newVel = new Vector(clickedPos.getX() - currentPos.getX(),
+                        clickedPos.getY() - currentPos.getY())
+                        .subtract(currentVel);
+
+                humanPlayer.setSelectedAcceleration(newVel);
+
+                // Esegui la mossa
+                advanceTurn();
+                validMoves.clear();
+            }
+
+            draw();
+        }
     }
 
     /**
@@ -239,28 +283,34 @@ public class GUIView extends Application {
             for (int x = 0; x < track.getWidth(); x++) {
                 CellType cell = track.getCell(x, y);
                 Color fill;
-                switch (cell) {
-                    case WALL:
-                        fill = Color.BLACK;
-                        break;
-                    case ROAD:
-                    case CHECKPOINT:
-                        fill = Color.LIGHTGRAY;
-                        break;
-                    case START:
-                        fill = Color.LIGHTGREEN;
-                        break;
-                    case FINISH:
-                        fill = Color.LIGHTCORAL;
-                        break;
-                    default:
-                        fill = Color.WHITE;
-                        break;
+                Position currentPos = new Position(x, y);
+
+                // Evidenzia le mosse valide per il giocatore umano
+                if (!validMoves.isEmpty() && validMoves.contains(currentPos)) {
+                    fill = Color.LIGHTGREEN;
+                } else {
+                    switch (cell) {
+                        case WALL:
+                            fill = Color.BLACK;
+                            break;
+                        case ROAD:
+                        case CHECKPOINT:
+                            fill = Color.LIGHTGRAY;
+                            break;
+                        case START:
+                            fill = Color.LIGHTGREEN;
+                            break;
+                        case FINISH:
+                            fill = Color.LIGHTCORAL;
+                            break;
+                        default:
+                            fill = Color.WHITE;
+                            break;
+                    }
                 }
+
                 gc.setFill(fill);
                 gc.fillRect(x * cellSize, y * cellSize, cellSize, cellSize);
-
-                // Bordo cella
                 gc.setStroke(Color.BLACK);
                 gc.strokeRect(x * cellSize, y * cellSize, cellSize, cellSize);
             }
@@ -269,13 +319,16 @@ public class GUIView extends Application {
         // Disegna i giocatori
         for (Player player : gameState.getPlayers()) {
             Position pos = player.getPosition();
-            Color pColor = Color.rgb(player.getColor().getRed(),
+            Color pColor = Color.rgb(
+                    player.getColor().getRed(),
                     player.getColor().getGreen(),
                     player.getColor().getBlue());
             gc.setFill(pColor);
-            gc.fillOval(pos.getX() * cellSize + 2,
+            gc.fillOval(
+                    pos.getX() * cellSize + 2,
                     pos.getY() * cellSize + 2,
-                    cellSize - 4, cellSize - 4);
+                    cellSize - 4,
+                    cellSize - 4);
         }
     }
 }
