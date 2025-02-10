@@ -77,11 +77,13 @@ public class CLIView {
             }
         }
 
-        // Sovrapponi i giocatori (utilizzando la prima lettera del loro nome)
+        // Sovrapponi i giocatori (utilizzando il numero dal nome del bot)
         for (Player player : gameState.getPlayers()) {
             Position pos = player.getPosition();
             if (track.isWithinBounds(pos.getX(), pos.getY())) {
-                grid[pos.getY()][pos.getX()] = player.getName().substring(0, 1);
+                // Estrai il numero dal nome del bot (es: "Bot1" -> "1")
+                String playerNumber = player.getName().replaceAll("\\D+", "");
+                grid[pos.getY()][pos.getX()] = playerNumber;
             }
         }
 
