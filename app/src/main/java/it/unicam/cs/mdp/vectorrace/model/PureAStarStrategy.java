@@ -15,7 +15,7 @@ public class PureAStarStrategy implements AIStrategy {
         new Vector(0, -1),  new Vector(0, 0),  new Vector(0, 1),
         new Vector(1, -1),  new Vector(1, 0),  new Vector(1, 1)
     };
-    private static final int MAX_SPEED = 5;
+    private static final int MAX_SPEED = 9;
 
     private final CheckpointTargetFinder targetFinder = new CheckpointTargetFinder();
     private final CheckpointManager checkpointManager = new CheckpointManager();

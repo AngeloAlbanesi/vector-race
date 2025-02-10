@@ -50,6 +50,7 @@ public class MovementManager {
                 if (track.getCell(currentX, currentY) == CellType.WALL) {
                     return false;
                 }
+                // Se questa cella e' occupata da un giocatore fermo, no
                 if (occupiedCells.contains(new Position(currentX, currentY))) {
                     return false;
                 }
@@ -62,7 +63,7 @@ public class MovementManager {
     }
 
     /**
-     * Versione "stateless" usata dal PathFinder (A*), che non controlla collisioni con altri giocatori,
+     * Versione "stateless" usata dal PathFinder (A*), che non controlla collisioni con altri giocatori in movimento,
      * ma solo i muri.
      */
     public boolean validateMoveTemp(Position start, Vector velocity, Track track) {
@@ -97,6 +98,10 @@ public class MovementManager {
         return true;
     }
 
+    /**
+     * Restituisce le posizioni dei giocatori "fermi" (velocity zero),
+     * da considerare come occupate.
+     */
     private Set<Position> getOccupiedPositions(GameState gameState, Player currentPlayer) {
         Set<Position> occupied = new HashSet<>();
         for (Player other : gameState.getPlayers()) {
@@ -109,6 +114,9 @@ public class MovementManager {
         return occupied;
     }
 
+    /**
+     * Verifica se la cella 'pos' e' occupata da un giocatore fermo (diverso da 'currentPlayer').
+     */
     private boolean isCellOccupiedByStationaryPlayer(Position pos, GameState gameState, Player currentPlayer) {
         for (Player other : gameState.getPlayers()) {
             if (!other.getName().equals(currentPlayer.getName())) {

@@ -36,9 +36,6 @@ public class GameController {
 
     /**
      * Costruttore.
-     *
-     * @param gameState stato iniziale della gara
-     * @param cliView   interfaccia a riga di comando
      */
     public GameController(GameState gameState, CLIView cliView) {
         this.gameState = gameState;
@@ -49,19 +46,11 @@ public class GameController {
      * Avvia il ciclo di gioco fino a quando non viene determinato un vincitore.
      */
     public void startGame() {
-
+        // Se preferisci la logica a riga di comando, puoi implementarla qui
     }
 
     /**
-     * Carica i giocatori da un file di configurazione. Formato (una riga per
-     * giocatore): Tipo;Nome;Colore (HEX);Strategia (1 = simplestrategy, 2 =
-     * BFS)
-     *
-     * @param filePath       percorso del file dei giocatori
-     * @param startPositions lista di posizioni di partenza ottenute dal
-     *                       circuito
-     * @return lista di giocatori creati
-     * @throws IOException se si verifica un errore di I/O
+     * Carica i giocatori da un file.
      */
     public static List<Player> loadPlayers(String filePath, List<Position> startPositions) throws IOException {
         System.out.printf("[DEBUG] Caricamento giocatori da: %s%n", filePath);
@@ -91,7 +80,7 @@ public class GameController {
                 if (type.equalsIgnoreCase("Human")) {
                     players.add(new HumanPlayer(name, color, startPos));
                 } else if (type.equalsIgnoreCase("Bot")) {
-                    int strategyType = 1; // Default to SimpleStrategy
+                    int strategyType = 1; 
                     if (parts.length >= 4) {
                         try {
                             strategyType = Integer.parseInt(parts[3].trim());
@@ -120,11 +109,6 @@ public class GameController {
 
     /**
      * Inizializza il gioco caricando il circuito e i giocatori.
-     *
-     * @param trackFile  percorso del file del circuito
-     * @param playerFile percorso del file dei giocatori
-     * @return stato iniziale della gara
-     * @throws IOException in caso di errori di I/O
      */
     public static GameState initializeGame(String trackFile, String playerFile) throws IOException {
         System.out.printf("[DEBUG] Inizializzazione gioco%n");

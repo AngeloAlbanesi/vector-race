@@ -27,11 +27,7 @@ import javafx.stage.Stage;
 import javafx.util.Duration;
 
 /**
- * Interfaccia grafica realizzata con JavaFX per la simulazione del gioco. I
- * checkpoint sono rappresentati da numeri: ogni volta che un bot raggiunge il
- * checkpoint atteso (ossia, la cella CHECKPOINT il cui ordine corrisponde a
- * getNextCheckpointIndex()), il bot aggiorna il target al checkpoint successivo
- * e infine punta al traguardo.
+ * Interfaccia grafica realizzata con JavaFX per la simulazione del gioco.
  */
 public class GUIView extends Application {
 
@@ -136,47 +132,62 @@ public class GUIView extends Application {
     }
 
     /**
-     * Avanza un turno.
+     * Avanza un turno (un giocatore).
      */
     private void advanceTurn() {
         Player currentPlayer = gameState.getCurrentPlayer();
         Track track = gameState.getTrack();
 
-        // Ottieni l'accelerazione
+        // Ottieni l'accelerazione dal giocatore (BFS/A* o umano)
         Vector acceleration = currentPlayer.getNextAcceleration(gameState);
         if (acceleration == null) {
             statusLabel.setText(currentPlayer.getName() + " non ha fornito un'accelerazione valida.");
             acceleration = new Vector(0, 0);
         }
 
-        // Prova ad applicare il movimento usando MovementManager
+        // Movimento valido su muri/giocatori fermi?
         if (!movementManager.validateMove(currentPlayer, acceleration, gameState)) {
-            statusLabel.setText(currentPlayer.getName() + " ha colliso! Velocità resettata.");
+            statusLabel.setText(currentPlayer.getName() + " ha colliso con un muro o giocatore fermo! Velocità resettata.");
             currentPlayer.resetVelocity();
         } else {
-            // Il movimento è valido, aggiorna posizione e velocità
+            // Movimento ok su muri, costruiamo la nuova posizione
             Vector newVelocity = currentPlayer.getVelocity().add(acceleration);
             Position newPosition = currentPlayer.getPosition().move(newVelocity);
-            currentPlayer.updatePosition(newPosition);
-            currentPlayer.updateVelocity(newVelocity);
 
-            // Verifica se ha raggiunto il traguardo
-            CellType currentCell = track.getCell(newPosition.getX(), newPosition.getY());
-            if (currentCell == CellType.FINISH) {
-                statusLabel.setText(currentPlayer.getName() + " ha raggiunto il traguardo!");
+            // Controllo "anti-sovrapposizione" con altri giocatori GIA' mossi
+            if (isPositionOccupiedByOtherPlayer(newPosition, currentPlayer)) {
+                // Se la cella è già presa, il giocatore resta fermo
+                statusLabel.setText(currentPlayer.getName() + " ha trovato la cella occupata da un altro giocatore, resta fermo!");
+                currentPlayer.resetVelocity();
+            } else {
+                // Non è occupata: aggiorniamo posizione e velocità
+                currentPlayer.updatePosition(newPosition);
+                currentPlayer.updateVelocity(newVelocity);
+
+                // Check se ha raggiunto FINISH
+                CellType currentCell = track.getCell(newPosition.getX(), newPosition.getY());
+                if (currentCell == CellType.FINISH) {
+                    statusLabel.setText(currentPlayer.getName() + " ha raggiunto il traguardo!");
+                }
             }
         }
 
+        // Controlla se ha terminato la gara
         if (gameState.checkFinish(currentPlayer)) {
             gameState.setFinished(true);
             gameState.setWinner(currentPlayer);
             statusLabel.setText("Vincitore: " + currentPlayer.getName());
             timeline.stop(); // Ferma l'animazione
-            return; // Esce per evitare nextTurn() dopo la fine
+            return; 
         }
+
+        // Passa turno
         gameState.nextTurn();
     }
 
+    /**
+     * Ritorna true se 'position' è già occupata da un altro giocatore.
+     */
     private boolean isPositionOccupiedByOtherPlayer(Position position, Player currentPlayer) {
         for (Player otherPlayer : gameState.getPlayers()) {
             if (otherPlayer != currentPlayer && otherPlayer.getPosition().equals(position)) {
@@ -187,7 +198,7 @@ public class GUIView extends Application {
     }
 
     /**
-     * Disegna il circuito e i giocatori sul canvas.
+     * Disegna circuito e giocatori sul canvas.
      */
     private void draw() {
         GraphicsContext gc = canvas.getGraphicsContext2D();
@@ -221,11 +232,11 @@ public class GUIView extends Application {
                 gc.setFill(fill);
                 gc.fillRect(x * cellSize, y * cellSize, cellSize, cellSize);
 
-                // Disegna il contorno delle celle
+                // Bordo cella
                 gc.setStroke(Color.BLACK);
                 gc.strokeRect(x * cellSize, y * cellSize, cellSize, cellSize);
 
-                // Se è un checkpoint, mostra il numero
+                // Numerino per i checkpoint
                 if (cell == CellType.CHECKPOINT) {
                     gc.setFill(Color.BLACK);
                     int checkpointNum = getCheckpointNumber(track, x, y);
@@ -244,10 +255,10 @@ public class GUIView extends Application {
                     player.getColor().getBlue());
             gc.setFill(pColor);
             gc.fillOval(pos.getX() * cellSize + 2,
-                    pos.getY() * cellSize + 2,
-                    cellSize - 4, cellSize - 4);
+                        pos.getY() * cellSize + 2,
+                        cellSize - 4, cellSize - 4);
 
-            // Mostra il prossimo checkpoint del giocatore
+            // Mostra il prossimo checkpoint
             gc.setFill(Color.BLACK);
             gc.fillText(String.valueOf(player.getNextCheckpointIndex()),
                     pos.getX() * cellSize + cellSize / 3,
@@ -255,8 +266,12 @@ public class GUIView extends Application {
         }
     }
 
+    /**
+     * Restituisce un numero fittizio per il checkpoint (solo per disegno),
+     * se la logica del circuito ha definito un'ordinazione. Rimane il tuo codice esistente.
+     */
     private int getCheckpointNumber(Track track, int x, int y) {
-        // Ordina i checkpoint da sinistra a destra
+        // Ordina i checkpoint da sinistra a destra (logica fittizia esistente)
         int checkpointIndex = 0;
         boolean found = false;
 
@@ -311,7 +326,6 @@ public class GUIView extends Application {
                 }
             }
         }
-
         return checkpointIndex + 1;
     }
 }
