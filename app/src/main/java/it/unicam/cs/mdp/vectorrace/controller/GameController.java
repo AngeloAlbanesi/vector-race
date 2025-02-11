@@ -1,11 +1,25 @@
 package it.unicam.cs.mdp.vectorrace.controller;
 
-import it.unicam.cs.mdp.vectorrace.model.*;
-import it.unicam.cs.mdp.vectorrace.view.*;
-
 import java.awt.Color;
 import java.io.*;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import it.unicam.cs.mdp.vectorrace.model.core.CellType;
+import it.unicam.cs.mdp.vectorrace.model.core.Position;
+import it.unicam.cs.mdp.vectorrace.model.core.Track;
+import it.unicam.cs.mdp.vectorrace.model.core.Vector;
+import it.unicam.cs.mdp.vectorrace.view.CLIView;
+import it.unicam.cs.mdp.vectorrace.model.ai.BFSStrategy;
+import it.unicam.cs.mdp.vectorrace.model.ai.PriorityData;
+import it.unicam.cs.mdp.vectorrace.model.ai.PureAStarStrategy;
+import it.unicam.cs.mdp.vectorrace.model.game.GameState;
+import it.unicam.cs.mdp.vectorrace.model.game.MovementManager;
+import it.unicam.cs.mdp.vectorrace.model.players.BotPlayer;
+import it.unicam.cs.mdp.vectorrace.model.players.HumanPlayer;
+import it.unicam.cs.mdp.vectorrace.model.players.Player;
 
 /**
  * Controller principale che inizializza e gestisce il ciclo di gioco.
@@ -163,10 +177,10 @@ public class GameController {
         Track track = gameState.getTrack();
 
         // Ottieni l'accelerazione dal giocatore (bot)
-        it.unicam.cs.mdp.vectorrace.model.Vector acceleration = currentPlayer.getNextAcceleration(gameState);
+        Vector acceleration = currentPlayer.getNextAcceleration(gameState);
         if (acceleration == null) {
             cliView.displayMessage(currentPlayer.getName() + " non ha fornito un'accelerazione valida.");
-            acceleration = new it.unicam.cs.mdp.vectorrace.model.Vector(0, 0);
+            acceleration = new Vector(0, 0);
         }
 
         // Verifica movimento
@@ -176,7 +190,7 @@ public class GameController {
             currentPlayer.resetVelocity();
         } else {
             // Movimento valido
-            it.unicam.cs.mdp.vectorrace.model.Vector newVelocity = currentPlayer.getVelocity().add(acceleration);
+            Vector newVelocity = currentPlayer.getVelocity().add(acceleration);
             Position newPosition = currentPlayer.getPosition().move(newVelocity);
 
             // Verifica sovrapposizione con altri giocatori

@@ -1,13 +1,13 @@
 package it.unicam.cs.mdp.vectorrace.view;
 
-import it.unicam.cs.mdp.vectorrace.model.CellType;
-import it.unicam.cs.mdp.vectorrace.model.GameState;
-import it.unicam.cs.mdp.vectorrace.model.HumanPlayer;
-import it.unicam.cs.mdp.vectorrace.model.Player;
-import it.unicam.cs.mdp.vectorrace.model.Position;
-import it.unicam.cs.mdp.vectorrace.model.Track;
-import it.unicam.cs.mdp.vectorrace.model.Vector;
-import it.unicam.cs.mdp.vectorrace.model.MovementManager;
+import it.unicam.cs.mdp.vectorrace.model.core.CellType;
+import it.unicam.cs.mdp.vectorrace.model.core.Position;
+import it.unicam.cs.mdp.vectorrace.model.core.Track;
+import it.unicam.cs.mdp.vectorrace.model.core.Vector;
+import it.unicam.cs.mdp.vectorrace.model.game.GameState;
+import it.unicam.cs.mdp.vectorrace.model.game.MovementManager;
+import it.unicam.cs.mdp.vectorrace.model.players.HumanPlayer;
+import it.unicam.cs.mdp.vectorrace.model.players.Player;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.application.Application;
@@ -252,7 +252,7 @@ public class GUIView extends Application {
 
         // Passa turno
         gameState.nextTurn();
-        
+
         // Aggiorna le mosse valide se il prossimo giocatore è umano
         if (gameState.getCurrentPlayer() instanceof HumanPlayer) {
             HumanPlayer humanPlayer = (HumanPlayer) gameState.getCurrentPlayer();

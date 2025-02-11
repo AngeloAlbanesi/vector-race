@@ -1,7 +1,7 @@
 package it.unicam.cs.mdp.vectorrace;
 
 import it.unicam.cs.mdp.vectorrace.controller.GameController;
-import it.unicam.cs.mdp.vectorrace.model.GameState;
+import it.unicam.cs.mdp.vectorrace.model.game.GameState;
 import it.unicam.cs.mdp.vectorrace.view.CLIView;
 import it.unicam.cs.mdp.vectorrace.view.CircuitSelectionView;
 import javafx.application.Application;

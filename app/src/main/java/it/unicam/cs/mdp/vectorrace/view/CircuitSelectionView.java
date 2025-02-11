@@ -7,7 +7,8 @@ import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import it.unicam.cs.mdp.vectorrace.controller.GameController;
-import it.unicam.cs.mdp.vectorrace.model.GameState;
+import it.unicam.cs.mdp.vectorrace.model.game.GameState;
+
 import java.nio.file.Paths;
 
 public class CircuitSelectionView {

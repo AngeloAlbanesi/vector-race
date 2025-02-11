@@ -1,10 +1,10 @@
 package it.unicam.cs.mdp.vectorrace.view;
 
-import it.unicam.cs.mdp.vectorrace.model.GameState;
-import it.unicam.cs.mdp.vectorrace.model.Player;
-import it.unicam.cs.mdp.vectorrace.model.Position;
-import it.unicam.cs.mdp.vectorrace.model.Track;
-import it.unicam.cs.mdp.vectorrace.model.CellType;
+import it.unicam.cs.mdp.vectorrace.model.core.Position;
+import it.unicam.cs.mdp.vectorrace.model.core.Track;
+import it.unicam.cs.mdp.vectorrace.model.game.GameState;
+import it.unicam.cs.mdp.vectorrace.model.players.Player;
+import it.unicam.cs.mdp.vectorrace.model.core.CellType;
 
 /**
  * Interfaccia a riga di comando per visualizzare lo stato del gioco.
