@@ -10,7 +10,7 @@ import it.unicam.cs.mdp.vectorrace.model.players.Player;
  * per gestire le varie responsabilità dell'algoritmo.
  */
 public class BFSStrategy implements AIStrategy {
-    
+
     private final BFSExecutor bfsExecutor;
     private final IMoveValidator moveValidator;
     private final CheckpointTargetFinder targetFinder;
@@ -20,9 +20,9 @@ public class BFSStrategy implements AIStrategy {
      * Costruttore con dependency injection per tutti i componenti necessari.
      */
     public BFSStrategy(BFSExecutor bfsExecutor,
-                      IMoveValidator moveValidator,
-                      CheckpointTargetFinder targetFinder,
-                      CheckpointManager checkpointManager) {
+            IMoveValidator moveValidator,
+            CheckpointTargetFinder targetFinder,
+            CheckpointManager checkpointManager) {
         this.bfsExecutor = bfsExecutor;
         this.moveValidator = moveValidator;
         this.targetFinder = targetFinder;
@@ -30,7 +30,8 @@ public class BFSStrategy implements AIStrategy {
     }
 
     /**
-     * Costruttore di default che inizializza i componenti con le implementazioni standard.
+     * Costruttore di default che inizializza i componenti con le implementazioni
+     * standard.
      */
     public BFSStrategy() {
         this.moveValidator = new MovementValidatorAdapter();
@@ -52,11 +53,10 @@ public class BFSStrategy implements AIStrategy {
 
         // Esegui la ricerca BFS
         BFSExecutor.SearchResult result = bfsExecutor.search(
-            currentPosition,
-            currentVelocity,
-            target,
-            gameState.getTrack()
-        );
+                currentPosition,
+                currentVelocity,
+                target,
+                gameState.getTrack());
 
         // Se non è stato trovato un percorso valido
         if (!result.isFound()) {
@@ -77,18 +77,17 @@ public class BFSStrategy implements AIStrategy {
     /**
      * Valida la mossa finale e aggiorna i checkpoint attraversati.
      */
-    private boolean validateFinalMove(Player player, Vector acceleration, 
-                                    Position startPosition, GameState gameState) {
+    private boolean validateFinalMove(Player player, Vector acceleration,
+            Position startPosition, GameState gameState) {
         Vector finalVelocity = player.getVelocity().add(acceleration);
         Position finalPosition = player.getPosition().move(finalVelocity);
 
         if (moveValidator.validateRealMove(player, acceleration, gameState)) {
             checkpointManager.checkCrossedCheckpoints(
-                player, 
-                startPosition, 
-                finalPosition, 
-                gameState.getTrack()
-            );
+                    player,
+                    startPosition,
+                    finalPosition,
+                    gameState.getTrack());
             return true;
         }
 
