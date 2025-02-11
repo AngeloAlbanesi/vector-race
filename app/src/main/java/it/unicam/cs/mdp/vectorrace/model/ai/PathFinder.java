@@ -128,7 +128,7 @@ public class PathFinder {
         return Math.sqrt(dx * dx + dy * dy);
     }
 
-    // Se vuoi reintrodurre bounding box:
+    // Se si vuole introdurre bounding box:
     // private boolean withinBoundingBox(Position current, Position target) {
     // return Math.abs(current.getX() - target.getX()) <= BOUND_DISTANCE
     // && Math.abs(current.getY() - target.getY()) <= BOUND_DISTANCE;
