@@ -1,74 +1,81 @@
 package it.unicam.cs.mdp.vectorrace.model.core;
 
-import java.io.*;
-import java.util.*;
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import it.unicam.cs.mdp.vectorrace.model.ai.PriorityData;
 
 /**
- * Classe utility per il caricamento del circuito da un file di testo. Il file
- * utilizza i seguenti simboli:
- * <ul>
- * <li>'#' : Muro (cella non percorribile)</li>
- * <li>'.' : Strada (cella percorribile)</li>
- * <li>'S' : Posizione di partenza</li>
- * <li>'*' : Posizione di arrivo</li>
- * <li>Un carattere numerico (es. '1','2',...) : Checkpoint, l'ordine è dato dal
- * numero</li>
- * </ul>
+ * Classe responsabile del caricamento e parsing dei file del circuito.
+ * Implementa il Single Responsibility Principle gestendo solo la logica di caricamento tracciato.
  */
 public class TrackLoader {
-
-    public static Track loadTrack(String filePath) throws IOException {
-        List<String> lines = new ArrayList<>();
-        try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
-            String line;
-            while ((line = br.readLine()) != null) {
-                if (!line.trim().isEmpty()) {
-                    lines.add(line);
-                }
-            }
-        }
+    
+    /**
+     * Carica un circuito da file.
+     * 
+     * @param path Il percorso del file del circuito
+     * @return Il circuito caricato
+     * @throws IOException Se si verificano errori durante la lettura del file
+     */
+    public static Track loadTrack(String path) throws IOException {
+        List<String> lines = readLines(path);
         if (lines.isEmpty()) {
-            throw new IllegalArgumentException("Il file del circuito è vuoto: " + filePath);
+            throw new IOException("Il file del circuito è vuoto");
         }
 
         int height = lines.size();
         int width = lines.get(0).length();
         CellType[][] grid = new CellType[height][width];
-        // Mappa per memorizzare i checkpoint con i loro dati di priorità
         Map<Position, PriorityData> checkpointData = new HashMap<>();
 
         for (int y = 0; y < height; y++) {
             String line = lines.get(y);
-            if (line.length() != width) {
-                throw new IllegalArgumentException(
-                        "Tutte le righe devono avere la stessa larghezza. Errore alla riga " + (y + 1));
-            }
             for (int x = 0; x < width; x++) {
                 char c = line.charAt(x);
                 if (Character.isDigit(c)) {
-                    // Se il carattere è una cifra, consideralo come checkpoint
                     grid[y][x] = CellType.CHECKPOINT;
-                    int checkpointNumber = c - '0';
-                    // Assegna priorità in base al numero del checkpoint
-                    int priorityLevel = calculatePriorityLevel(checkpointNumber);
+                    int checkpointNumber = Character.getNumericValue(c);
                     checkpointData.put(
                             new Position(x, y),
-                            new PriorityData(priorityLevel, checkpointNumber));
+                            new PriorityData(calculatePriorityLevel(checkpointNumber), checkpointNumber));
                 } else {
                     grid[y][x] = CellType.fromChar(c);
                 }
             }
         }
+
         return new Track(grid, checkpointData);
     }
 
     /**
-     * Calcola il livello di priorità in base al numero del checkpoint:
-     * 1-3: priorità bassa (1)
-     * 4-6: priorità media (2)
-     * 7+: priorità alta (3)
+     * Legge le linee del file.
+     * 
+     * @param path Il percorso del file
+     * @return Lista delle linee lette
+     * @throws IOException Se si verificano errori durante la lettura
+     */
+    private static List<String> readLines(String path) throws IOException {
+        List<String> lines = new ArrayList<>();
+        try (BufferedReader reader = new BufferedReader(new FileReader(path))) {
+            String line;
+            while ((line = reader.readLine()) != null && !line.trim().isEmpty()) {
+                lines.add(line);
+            }
+        }
+        return lines;
+    }
+
+    /**
+     * Calcola il livello di priorità di un checkpoint.
+     * 
+     * @param checkpointNumber Il numero del checkpoint
+     * @return Il livello di priorità calcolato
      */
     private static int calculatePriorityLevel(int checkpointNumber) {
         if (checkpointNumber <= 3) {
@@ -78,17 +85,5 @@ public class TrackLoader {
         } else {
             return 3; // Priorità alta
         }
-    }
-
-    public static List<Position> getStartPositions(Track track) {
-        List<Position> startPositions = new ArrayList<>();
-        for (int y = 0; y < track.getHeight(); y++) {
-            for (int x = 0; x < track.getWidth(); x++) {
-                if (track.isStart(x, y)) {
-                    startPositions.add(new Position(x, y));
-                }
-            }
-        }
-        return startPositions;
     }
 }

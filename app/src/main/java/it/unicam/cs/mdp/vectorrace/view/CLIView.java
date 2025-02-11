@@ -7,24 +7,19 @@ import it.unicam.cs.mdp.vectorrace.model.players.Player;
 import it.unicam.cs.mdp.vectorrace.model.core.CellType;
 
 /**
- * Interfaccia a riga di comando per visualizzare lo stato del gioco.
+ * Implementazione CLI dell'interfaccia di visualizzazione del gioco.
+ * Implementa sia GameView per le funzionalità base che CLISpecific per le funzionalità specifiche della CLI.
  */
-public class CLIView {
+public class CLIView implements GameView, CLISpecific {
     private boolean isGameRunning = false;
 
-    /**
-     * Visualizza un messaggio sullo standard output.
-     *
-     * @param message messaggio da mostrare
-     */
+    @Override
     public void displayMessage(String message) {
         System.out.println(message);
         System.out.flush(); // Forza l'output immediato
     }
 
-    /**
-     * Mostra il menu di selezione del circuito.
-     */
+    @Override
     public void showCircuitSelection() {
         System.out.println("\n=== Vector Race - Selezione Circuito ===");
         System.out.println("1. Circuito 1");
@@ -34,9 +29,7 @@ public class CLIView {
         System.out.flush(); // Forza l'output immediato
     }
 
-    /**
-     * Mostra il menu principale del gioco.
-     */
+    @Override
     public void showGameMenu() {
         System.out.println("\n=== Menu di Gioco ===");
         System.out.println("1. Avvia simulazione");
@@ -45,12 +38,7 @@ public class CLIView {
         System.out.flush(); // Forza l'output immediato
     }
 
-    /**
-     * Renderizza lo stato corrente del circuito, sovrapponendo la posizione
-     * dei giocatori.
-     *
-     * @param gameState stato di gioco da visualizzare
-     */
+    @Override
     public void displayGameState(GameState gameState) {
         Track track = gameState.getTrack();
         int width = track.getWidth();
@@ -144,16 +132,12 @@ public class CLIView {
         System.out.flush();
     }
 
-    /**
-     * Imposta lo stato di esecuzione del gioco
-     */
+    @Override
     public void setGameRunning(boolean running) {
         this.isGameRunning = running;
     }
 
-    /**
-     * Restituisce lo stato di esecuzione del gioco
-     */
+    @Override
     public boolean isGameRunning() {
         return this.isGameRunning;
     }
