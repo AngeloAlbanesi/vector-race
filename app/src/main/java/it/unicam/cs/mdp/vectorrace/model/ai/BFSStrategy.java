@@ -5,6 +5,7 @@ import java.util.LinkedList;
 import java.util.Queue;
 import java.util.Set;
 
+import it.unicam.cs.mdp.vectorrace.model.core.AccelerationType;
 import it.unicam.cs.mdp.vectorrace.model.core.Position;
 import it.unicam.cs.mdp.vectorrace.model.core.Vector;
 import it.unicam.cs.mdp.vectorrace.model.game.GameState;
@@ -18,12 +19,6 @@ import it.unicam.cs.mdp.vectorrace.model.players.Player;
 public class BFSStrategy implements AIStrategy {
 
     private final MovementManager movementManager = new MovementManager();
-    // Tutte le accelerazioni possibili
-    private static final Vector[] ACCELERATIONS = {
-            new Vector(-1, -1), new Vector(-1, 0), new Vector(-1, 1),
-            new Vector(0, -1), new Vector(0, 0), new Vector(0, 1),
-            new Vector(1, -1), new Vector(1, 0), new Vector(1, 1)
-    };
     // Limite di velocità
     private static final int MAX_SPEED = 4;
 
@@ -64,7 +59,7 @@ public class BFSStrategy implements AIStrategy {
             }
 
             // Genera vicini
-            for (Vector acc : ACCELERATIONS) {
+            for (Vector acc : AccelerationType.getAllVectors()) {
                 Vector newVel = node.velocity.add(acc);
                 if (Math.abs(newVel.getDx()) > MAX_SPEED || Math.abs(newVel.getDy()) > MAX_SPEED) {
                     continue;

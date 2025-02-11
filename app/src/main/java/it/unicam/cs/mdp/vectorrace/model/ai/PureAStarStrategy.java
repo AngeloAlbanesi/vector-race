@@ -5,6 +5,7 @@ import java.util.HashSet;
 import java.util.PriorityQueue;
 import java.util.Set;
 
+import it.unicam.cs.mdp.vectorrace.model.core.AccelerationType;
 import it.unicam.cs.mdp.vectorrace.model.core.Position;
 import it.unicam.cs.mdp.vectorrace.model.core.Vector;
 import it.unicam.cs.mdp.vectorrace.model.game.GameState;
@@ -18,11 +19,6 @@ import it.unicam.cs.mdp.vectorrace.model.players.Player;
 public class PureAStarStrategy implements AIStrategy {
 
     private final MovementManager movementManager = new MovementManager();
-    private static final Vector[] ACCELERATIONS = {
-            new Vector(-1, -1), new Vector(-1, 0), new Vector(-1, 1),
-            new Vector(0, -1), new Vector(0, 0), new Vector(0, 1),
-            new Vector(1, -1), new Vector(1, 0), new Vector(1, 1)
-    };
     private static final int MAX_SPEED = 4;
 
     private final CheckpointTargetFinder targetFinder = new CheckpointTargetFinder();
@@ -72,7 +68,7 @@ public class PureAStarStrategy implements AIStrategy {
             }
 
             // Espandiamo i vicini
-            for (Vector acc : ACCELERATIONS) {
+            for (Vector acc : AccelerationType.getAllVectors()) {
                 Vector newVel = current.velocity.add(acc);
                 // Rispettiamo la velocità massima
                 if (Math.abs(newVel.getDx()) > MAX_SPEED || Math.abs(newVel.getDy()) > MAX_SPEED) {
