@@ -1,138 +1,97 @@
 package it.unicam.cs.mdp.vectorrace.model.ai;
 
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.Queue;
-import java.util.Set;
-
-import it.unicam.cs.mdp.vectorrace.model.core.AccelerationType;
 import it.unicam.cs.mdp.vectorrace.model.core.Position;
 import it.unicam.cs.mdp.vectorrace.model.core.Vector;
 import it.unicam.cs.mdp.vectorrace.model.game.GameState;
-import it.unicam.cs.mdp.vectorrace.model.game.MovementManager;
 import it.unicam.cs.mdp.vectorrace.model.players.Player;
 
 /**
- * Strategia BFS pura per trovare il percorso con minor numero di mosse (turni).
- * Ogni stato: (Position, Velocity), costo = numero di turni.
+ * Implementazione della strategia BFS che utilizza componenti specializzati
+ * per gestire le varie responsabilità dell'algoritmo.
  */
 public class BFSStrategy implements AIStrategy {
+    
+    private final BFSExecutor bfsExecutor;
+    private final IMoveValidator moveValidator;
+    private final CheckpointTargetFinder targetFinder;
+    private final CheckpointManager checkpointManager;
 
-    private final MovementManager movementManager = new MovementManager();
-    // Limite di velocità
-    private static final int MAX_SPEED = 4;
+    /**
+     * Costruttore con dependency injection per tutti i componenti necessari.
+     */
+    public BFSStrategy(BFSExecutor bfsExecutor,
+                      IMoveValidator moveValidator,
+                      CheckpointTargetFinder targetFinder,
+                      CheckpointManager checkpointManager) {
+        this.bfsExecutor = bfsExecutor;
+        this.moveValidator = moveValidator;
+        this.targetFinder = targetFinder;
+        this.checkpointManager = checkpointManager;
+    }
 
-    private final CheckpointTargetFinder targetFinder = new CheckpointTargetFinder();
-    private final CheckpointManager checkpointManager = new CheckpointManager();
+    /**
+     * Costruttore di default che inizializza i componenti con le implementazioni standard.
+     */
+    public BFSStrategy() {
+        this.moveValidator = new MovementValidatorAdapter();
+        this.bfsExecutor = new BFSExecutor(moveValidator);
+        this.targetFinder = new CheckpointTargetFinder();
+        this.checkpointManager = new CheckpointManager();
+    }
 
     @Override
     public Vector getNextAcceleration(Player player, GameState gameState) {
-        Position current = player.getPosition();
-        Vector velocity = player.getVelocity();
+        Position currentPosition = player.getPosition();
+        Vector currentVelocity = player.getVelocity();
 
-        // Trova il prossimo checkpoint
+        // Trova il prossimo checkpoint target
         Position target = targetFinder.findNextTarget(player, gameState);
         if (target == null) {
-            // Se non c'è checkpoint, fermo
             return new Vector(0, 0);
         }
 
-        // BFS: coda, visited con (posizione, velocità)
-        Queue<BFSNode> queue = new LinkedList<>();
-        Set<BFSNode> visited = new HashSet<>();
+        // Esegui la ricerca BFS
+        BFSExecutor.SearchResult result = bfsExecutor.search(
+            currentPosition,
+            currentVelocity,
+            target,
+            gameState.getTrack()
+        );
 
-        // Stato iniziale
-        BFSNode start = new BFSNode(current, velocity, null, null);
-        queue.add(start);
-        visited.add(start);
-
-        BFSNode goal = null;
-
-        // Espansione BFS
-        while (!queue.isEmpty()) {
-            BFSNode node = queue.poll();
-
-            // Se abbiamo raggiunto il target
-            if (node.position.equals(target)) {
-                goal = node;
-                break;
-            }
-
-            // Genera vicini
-            for (Vector acc : AccelerationType.getAllVectors()) {
-                Vector newVel = node.velocity.add(acc);
-                if (Math.abs(newVel.getDx()) > MAX_SPEED || Math.abs(newVel.getDy()) > MAX_SPEED) {
-                    continue;
-                }
-                Position newPos = node.position.move(newVel);
-
-                // Verifica se non sbatte contro un muro / collisioni (solo muri, per BFS)
-                if (!movementManager.validateMoveTemp(node.position, newVel, gameState.getTrack())) {
-                    continue;
-                }
-
-                BFSNode nextNode = new BFSNode(newPos, newVel, node, acc);
-                if (!visited.contains(nextNode)) {
-                    visited.add(nextNode);
-                    queue.add(nextNode);
-                }
-            }
-        }
-
-        // Se non trovata alcuna via
-        if (goal == null) {
+        // Se non è stato trovato un percorso valido
+        if (!result.isFound()) {
             return new Vector(0, 0);
         }
 
-        // Ricostruiamo la catena per ottenere la prima accelerazione dal nostro stato
-        // attuale
-        BFSNode cur = goal;
-        // Risaliamo finché c'è un parent
-        while (cur.parent != null && cur.parent != start) {
-            cur = cur.parent;
-        }
-        // Se cur.parent == null => era lo start
-        // Se cur.parent == start => cur è la prima mossa
-        Vector chosenAcc = (cur.accApplied != null) ? cur.accApplied : new Vector(0, 0);
+        Vector chosenAcceleration = result.getNextAcceleration();
 
-        // Puoi anche verificare se la mossa è ancora valida “in tempo reale”
-        Vector finalVelocity = player.getVelocity().add(chosenAcc);
-        Position finalPos = player.getPosition().move(finalVelocity);
-        if (movementManager.validateMove(player, chosenAcc, gameState)) {
-            // Eventuali checkpoint attraversati
-            checkpointManager.checkCrossedCheckpoints(player, current, finalPos, gameState.getTrack());
-            return chosenAcc;
+        // Valida la mossa finale e aggiorna i checkpoint se necessario
+        if (validateFinalMove(player, chosenAcceleration, currentPosition, gameState)) {
+            return chosenAcceleration;
         }
 
-        // fallback
+        // Fallback: ritorna accelerazione nulla
         return new Vector(0, 0);
     }
 
-    // Nodo BFS
-    private static class BFSNode {
-        final Position position;
-        final Vector velocity;
-        final BFSNode parent;
-        final Vector accApplied; // l'accelerazione applicata per passare dal parent a questo
+    /**
+     * Valida la mossa finale e aggiorna i checkpoint attraversati.
+     */
+    private boolean validateFinalMove(Player player, Vector acceleration, 
+                                    Position startPosition, GameState gameState) {
+        Vector finalVelocity = player.getVelocity().add(acceleration);
+        Position finalPosition = player.getPosition().move(finalVelocity);
 
-        BFSNode(Position position, Vector velocity, BFSNode parent, Vector accApplied) {
-            this.position = position;
-            this.velocity = velocity;
-            this.parent = parent;
-            this.accApplied = accApplied;
+        if (moveValidator.validateRealMove(player, acceleration, gameState)) {
+            checkpointManager.checkCrossedCheckpoints(
+                player, 
+                startPosition, 
+                finalPosition, 
+                gameState.getTrack()
+            );
+            return true;
         }
 
-        @Override
-        public boolean equals(Object o) {
-            if (!(o instanceof BFSNode))
-                return false;
-            BFSNode other = (BFSNode) o;
-            return this.position.equals(other.position) && this.velocity.equals(other.velocity);
-        }
-
-        @Override
-        public int hashCode() {
-            return position.hashCode() * 31 + velocity.hashCode();
-        }
+        return false;
     }
 }
