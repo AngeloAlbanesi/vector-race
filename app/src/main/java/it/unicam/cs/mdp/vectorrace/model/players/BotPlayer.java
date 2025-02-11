@@ -4,7 +4,7 @@ import java.awt.Color;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
-import it.unicam.cs.mdp.vectorrace.model.ai.AIStrategy;
+import it.unicam.cs.mdp.vectorrace.model.ai.strategies.AIStrategy;
 import it.unicam.cs.mdp.vectorrace.model.core.Position;
 import it.unicam.cs.mdp.vectorrace.model.core.Vector;
 import it.unicam.cs.mdp.vectorrace.model.game.GameState;

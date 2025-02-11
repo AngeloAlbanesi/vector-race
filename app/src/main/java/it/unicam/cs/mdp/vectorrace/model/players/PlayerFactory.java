@@ -7,9 +7,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import it.unicam.cs.mdp.vectorrace.model.ai.AIStrategy;
-import it.unicam.cs.mdp.vectorrace.model.ai.BFSStrategy;
-import it.unicam.cs.mdp.vectorrace.model.ai.PureAStarStrategy;
+import it.unicam.cs.mdp.vectorrace.model.ai.strategies.AIStrategy;
+import it.unicam.cs.mdp.vectorrace.model.ai.strategies.AStar.PureAStarStrategy;
+import it.unicam.cs.mdp.vectorrace.model.ai.strategies.bfs.BFSStrategy;
 import it.unicam.cs.mdp.vectorrace.model.core.Position;
 
 /**
@@ -17,17 +17,19 @@ import it.unicam.cs.mdp.vectorrace.model.core.Position;
  * Implementa il Factory Pattern per incapsulare la logica di creazione.
  */
 public class PlayerFactory {
-    
+
     /**
      * Crea una lista di giocatori dal file specificato.
      *
-     * @param playerFile Il percorso del file dei giocatori
+     * @param playerFile     Il percorso del file dei giocatori
      * @param startPositions Le posizioni di partenza disponibili
      * @return Lista dei giocatori creati
-     * @throws IOException Se si verificano errori durante la lettura del file
+     * @throws IOException           Se si verificano errori durante la lettura del
+     *                               file
      * @throws IllegalStateException Se non ci sono abbastanza posizioni di partenza
      */
-    public static List<Player> createPlayersFromFile(String playerFile, List<Position> startPositions) throws IOException {
+    public static List<Player> createPlayersFromFile(String playerFile, List<Position> startPositions)
+            throws IOException {
         List<Player> players = new ArrayList<>();
         int startPosIndex = 0;
 
@@ -67,23 +69,24 @@ public class PlayerFactory {
      * Crea un singolo giocatore dai dati forniti.
      *
      * @param playerData I dati del giocatore dal file
-     * @param startPos La posizione di partenza
+     * @param startPos   La posizione di partenza
      * @return Il giocatore creato o null se i dati non sono validi
      */
     private static Player createPlayer(String[] playerData, Position startPos) {
         try {
-            String tipo = playerData[0].trim();
+            String tipo = playerData[0].trim().toLowerCase();
             String name = playerData[1].trim();
             String colorHex = playerData[2].trim();
             Color color = Color.decode(colorHex);
 
-            if (tipo.equalsIgnoreCase("Human")) {
-                return createHumanPlayer(name, color, startPos);
-            } else if (tipo.equalsIgnoreCase("Bot")) {
-                return createBotPlayer(name, color, startPos, playerData);
-            } else {
-                System.err.println("Tipo giocatore non valido: " + tipo);
-                return null;
+            switch (tipo) {
+                case "human":
+                    return createHumanPlayer(name, color, startPos);
+                case "bot":
+                    return createBotPlayer(name, color, startPos, playerData);
+                default:
+                    System.err.println("Tipo giocatore non valido: " + tipo);
+                    return null;
             }
         } catch (NumberFormatException e) {
             System.err.println("Errore nel parsing dei dati per il giocatore: " + e.getMessage());
@@ -104,11 +107,13 @@ public class PlayerFactory {
     private static Player createBotPlayer(String name, Color color, Position startPos, String[] playerData) {
         AIStrategy strategy;
         if (playerData.length > 3) {
-            int strategia = Integer.parseInt(playerData[3].trim());
-            if (strategia == 2) {
-                strategy = new PureAStarStrategy();
-            } else {
-                strategy = new BFSStrategy();
+            switch (Integer.parseInt(playerData[3].trim())) {
+                case 2:
+                    strategy = new PureAStarStrategy();
+                    break;
+                default:
+                    strategy = new BFSStrategy();
+                    break;
             }
         } else {
             System.err.println("Strategia non specificata per il bot " + name + ", uso BFS di default");

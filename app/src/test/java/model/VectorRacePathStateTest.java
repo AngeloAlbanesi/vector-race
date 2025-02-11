@@ -2,9 +2,9 @@ package model;
 
 import org.junit.jupiter.api.Test;
 
+import it.unicam.cs.mdp.vectorrace.model.ai.state.VectorRacePathState;
 import it.unicam.cs.mdp.vectorrace.model.core.Position;
 import it.unicam.cs.mdp.vectorrace.model.core.Vector;
-import it.unicam.cs.mdp.vectorrace.model.ai.VectorRacePathState;
 
 import static org.junit.jupiter.api.Assertions.*;
 

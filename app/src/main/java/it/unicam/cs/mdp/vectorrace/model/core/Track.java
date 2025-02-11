@@ -2,7 +2,7 @@ package it.unicam.cs.mdp.vectorrace.model.core;
 
 import java.util.*;
 
-import it.unicam.cs.mdp.vectorrace.model.ai.PriorityData;
+import it.unicam.cs.mdp.vectorrace.model.ai.checkpoint.PriorityData;
 
 /**
  * Rappresenta il circuito come una griglia di celle.

@@ -8,7 +8,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import it.unicam.cs.mdp.vectorrace.model.ai.PriorityData;
+import it.unicam.cs.mdp.vectorrace.model.ai.checkpoint.PriorityData;
 
 /**
  * Classe responsabile del caricamento e parsing dei file del circuito.
