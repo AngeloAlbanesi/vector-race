@@ -15,10 +15,12 @@ import it.unicam.cs.mdp.vectorrace.model.players.Player;
 /**
  * Implementazione dell'algoritmo A* per la ricerca del percorso.
  * Utilizza una funzione euristica configurabile e gestisce la validazione dei
- * movimenti.
+ * movimenti. Include una penalità ridotta quando ci si allontana dal target.
  */
 public class AStarPathFinder implements IPathFinder {
-    private static final int MAX_SPEED = 4;
+    private static final int MAX_SPEED = 5;
+    private static final int MAX_EXPANSIONS = 200000;
+    private static final double PENALTY_FACTOR = 5.0;
 
     private final IHeuristicCalculator heuristic;
     private final MovementManager movementManager;
@@ -56,7 +58,7 @@ public class AStarPathFinder implements IPathFinder {
     private AStarNode initializeStartNode(Position currentPos, Vector currentVel, Position target) {
         AStarNode startNode = new AStarNode(currentPos, currentVel, null, null);
         startNode.setGCost(0.0);
-        startNode.setHCost(heuristic.calculate(currentPos, target));
+        startNode.setHCost(calculateHeuristic(null, currentPos, currentVel, target));
         return startNode;
     }
 
@@ -65,7 +67,12 @@ public class AStarPathFinder implements IPathFinder {
             Set<AStarNode> closedSet,
             Position target,
             GameState gameState) {
+        int expansionsCount = 0;
         while (!openSet.isEmpty()) {
+            if (expansionsCount++ > MAX_EXPANSIONS) {
+                return null;
+            }
+
             AStarNode current = openSet.poll();
             if (current == null)
                 break;
@@ -105,7 +112,7 @@ public class AStarPathFinder implements IPathFinder {
             double tentativeG = current.getGCost() + 1.0;
 
             if (!closedSet.contains(neighbor) && tentativeG < neighbor.getGCost()) {
-                updateNeighborCosts(neighbor, tentativeG, newPos, target);
+                updateNeighborCosts(current, neighbor, tentativeG, target);
                 openSet.add(neighbor);
             }
         }
@@ -116,9 +123,29 @@ public class AStarPathFinder implements IPathFinder {
                 Math.abs(velocity.getDy()) <= MAX_SPEED;
     }
 
-    private void updateNeighborCosts(AStarNode neighbor, double gCost, Position pos, Position target) {
+    private void updateNeighborCosts(AStarNode current, AStarNode neighbor, double gCost, Position target) {
         neighbor.setGCost(gCost);
-        neighbor.setHCost(heuristic.calculate(pos, target));
+        neighbor.setHCost(calculateHeuristic(
+            current.getPosition(),
+            neighbor.getPosition(),
+            neighbor.getVelocity(),
+            target
+        ));
+    }
+
+    private double calculateHeuristic(Position oldPos, Position newPos, Vector newVel, Position target) {
+        double newDist = heuristic.calculate(newPos, target);
+        
+        // Aggiungi penalità se ci si allontana dal target
+        if (oldPos != null) {
+            double oldDist = heuristic.calculate(oldPos, target);
+            if (newDist > oldDist) {
+                newDist += PENALTY_FACTOR;
+            }
+        }
+
+        // Aggiungi fattore velocità per favorire movimenti più fluidi
+        return newDist + 0.5 * (Math.abs(newVel.getDx()) + Math.abs(newVel.getDy()));
     }
 
     private Vector reconstructPath(
