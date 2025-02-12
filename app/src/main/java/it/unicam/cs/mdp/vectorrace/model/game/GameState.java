@@ -3,6 +3,8 @@ package it.unicam.cs.mdp.vectorrace.model.game;
 import java.util.ArrayList;
 import java.util.List;
 
+import it.unicam.cs.mdp.vectorrace.model.core.CellType;
+import it.unicam.cs.mdp.vectorrace.model.core.Position;
 import it.unicam.cs.mdp.vectorrace.model.core.Track;
 import it.unicam.cs.mdp.vectorrace.model.players.Player;
 
@@ -110,7 +112,8 @@ public class GameState {
      * @return true se il giocatore ha finito la gara
      */
     public boolean checkFinish(Player player) {
-        return false;
+        Position pos = player.getPosition();
+        return track.getCell(pos.getX(), pos.getY()) == CellType.FINISH;
     }
 
 }
