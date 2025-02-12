@@ -32,31 +32,31 @@ public class CircuitSelectionView {
         Button circuit2 = new Button("Circuito 2");
         Button circuit3 = new Button("Circuito 3");
 
-        String circuit1Path = Paths.get(BASE_PATH, "src/main/resources/circuits/circuit1.txt").toString();
-        String circuit2Path = Paths.get(BASE_PATH, "src/main/resources/circuits/circuit2.txt").toString();
-        String circuit3Path = Paths.get(BASE_PATH, "src/main/resources/circuits/circuit3.txt").toString();
+        String circuit1Path = Paths.get(this.BASE_PATH, "src/main/resources/circuits/circuit1.txt").toString();
+        String circuit2Path = Paths.get(this.BASE_PATH, "src/main/resources/circuits/circuit2.txt").toString();
+        String circuit3Path = Paths.get(this.BASE_PATH, "src/main/resources/circuits/circuit3.txt").toString();
 
-        circuit1.setOnAction(e -> loadCircuit(circuit1Path));
-        circuit2.setOnAction(e -> loadCircuit(circuit2Path));
-        circuit3.setOnAction(e -> loadCircuit(circuit3Path));
+        circuit1.setOnAction(e -> this.loadCircuit(circuit1Path));
+        circuit2.setOnAction(e -> this.loadCircuit(circuit2Path));
+        circuit3.setOnAction(e -> this.loadCircuit(circuit3Path));
 
         root.getChildren().addAll(title, circuit1, circuit2, circuit3);
 
         Scene scene = new Scene(root, 400, 300);
-        stage.setTitle("Vector Race - Selezione Circuito");
-        stage.setScene(scene);
-        stage.show();
+        this.stage.setTitle("Vector Race - Selezione Circuito");
+        this.stage.setScene(scene);
+        this.stage.show();
     }
 
     private void loadCircuit(String circuitPath) {
         try {
             System.out.println("Caricamento circuito: " + circuitPath);
-            System.out.println("File giocatori: " + playerFile);
+            System.out.println("File giocatori: " + this.playerFile);
 
-            GameState gameState = GameController.initializeGame(circuitPath, playerFile);
+            GameState gameState = GameController.initializeGame(circuitPath, this.playerFile);
             GUIView.setGameState(gameState);
             GUIView gameView = new GUIView();
-            gameView.start(stage);
+            gameView.start(this.stage);
         } catch (Exception e) {
             System.err.println("Errore nel caricamento del circuito: " + e.getMessage());
             e.printStackTrace();

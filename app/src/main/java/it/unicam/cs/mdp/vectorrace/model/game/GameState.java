@@ -35,23 +35,23 @@ public class GameState {
     }
 
     public Track getTrack() {
-        return track;
+        return this.track;
     }
 
     public List<Player> getPlayers() {
-        return new ArrayList<>(players); // Restituisce una copia difensiva
+        return new ArrayList<>(this.players); // Restituisce una copia difensiva
     }
 
     public int getCurrentPlayerIndex() {
-        return currentPlayerIndex;
+        return this.currentPlayerIndex;
     }
 
     public Player getCurrentPlayer() {
-        return players.get(currentPlayerIndex);
+        return this.players.get(this.currentPlayerIndex);
     }
 
     public boolean isFinished() {
-        return finished;
+        return this.finished;
     }
 
     public void setFinished(boolean finished) {
@@ -59,7 +59,7 @@ public class GameState {
     }
 
     public Player getWinner() {
-        return winner;
+        return this.winner;
     }
 
     public void setWinner(Player winner) {
@@ -70,7 +70,7 @@ public class GameState {
      * Passa al turno del giocatore successivo.
      */
     public void nextTurn() {
-        currentPlayerIndex = (currentPlayerIndex + 1) % players.size();
+        this.currentPlayerIndex = (this.currentPlayerIndex + 1) % this.players.size();
     }
 
     /**

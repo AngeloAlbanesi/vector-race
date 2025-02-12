@@ -106,7 +106,7 @@ public class AStarPathFinder implements IPathFinder {
             }
 
             Position newPos = current.getPosition().move(newVel);
-            if (!movementManager.validateMoveTemp(current.getPosition(), newVel, gameState.getTrack())) {
+            if (!this.movementManager.validateMoveTemp(current.getPosition(), newVel, gameState.getTrack())) {
                 continue;
             }
 
@@ -135,11 +135,11 @@ public class AStarPathFinder implements IPathFinder {
     }
 
     private double calculateHeuristic(Position oldPos, Position newPos, Vector newVel, Position target) {
-        double newDist = heuristic.calculate(newPos, target);
+        double newDist = this.heuristic.calculate(newPos, target);
 
         // Aggiungi penalità se ci si allontana dal target
         if (oldPos != null) {
-            double oldDist = heuristic.calculate(oldPos, target);
+            double oldDist = this.heuristic.calculate(oldPos, target);
             if (newDist > oldDist) {
                 newDist += PENALTY_FACTOR;
             }
@@ -178,13 +178,13 @@ public class AStarPathFinder implements IPathFinder {
             Vector acceleration,
             Position currentPos,
             GameState gameState) {
-        if (!movementManager.validateMove(player, acceleration, gameState)) {
+        if (!this.movementManager.validateMove(player, acceleration, gameState)) {
             return false;
         }
 
         Vector finalVelocity = player.getVelocity().add(acceleration);
         Position finalPos = currentPos.move(finalVelocity);
-        checkpointManager.checkCrossedCheckpoints(player, currentPos, finalPos, gameState.getTrack());
+        this.checkpointManager.checkCrossedCheckpoints(player, currentPos, finalPos, gameState.getTrack());
 
         return true;
     }

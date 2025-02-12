@@ -1,6 +1,7 @@
 package it.unicam.cs.mdp.vectorrace.model.ai.strategies.bfs;
 
 import it.unicam.cs.mdp.vectorrace.model.ai.algorithms.bfs.BFSExecutor;
+import it.unicam.cs.mdp.vectorrace.model.ai.algorithms.bfs.BFSSearchResult;
 import it.unicam.cs.mdp.vectorrace.model.ai.checkpoint.CheckpointManager;
 import it.unicam.cs.mdp.vectorrace.model.ai.checkpoint.CheckpointTargetFinder;
 import it.unicam.cs.mdp.vectorrace.model.ai.services.IMoveValidator;
@@ -62,7 +63,7 @@ public class BFSStrategy implements AIStrategy {
     }
 
     private Vector calculateAcceleration(Player player, Position target, GameState gameState) {
-        BFSExecutor.SearchResult result = bfsExecutor.search(
+        BFSSearchResult result = bfsExecutor.search(
                 player.getPosition(),
                 player.getVelocity(),
                 target,

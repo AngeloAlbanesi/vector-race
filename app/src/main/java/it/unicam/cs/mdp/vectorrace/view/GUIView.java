@@ -71,18 +71,18 @@ public class GUIView extends Application {
         Track track = gameState.getTrack();
         double widthRatio = maxWidth / track.getWidth();
         double heightRatio = maxHeight / track.getHeight();
-        cellSize = (int) Math.min(Math.min(widthRatio, heightRatio), 30);
+        this.cellSize = (int) Math.min(Math.min(widthRatio, heightRatio), 30);
 
         BorderPane root = new BorderPane();
-        canvas = new Canvas(track.getWidth() * cellSize, track.getHeight() * cellSize);
-        root.setCenter(canvas);
+        this.canvas = new Canvas(track.getWidth() * this.cellSize, track.getHeight() * this.cellSize);
+        root.setCenter(this.canvas);
 
         // Pannello di controllo
         Button startButton = new Button("Avvia");
         Button pauseButton = new Button("Pausa");
         Button stepButton = new Button("Passo");
         Button exitButton = new Button("Termina gara");
-        statusLabel = new Label("Pronto");
+        this.statusLabel = new Label("Pronto");
 
         // Slider per la velocità
         Slider speedSlider = new Slider(0.1, 2.0, 1.0);
@@ -93,52 +93,52 @@ public class GUIView extends Application {
         VBox controlsBox = new VBox(10);
         HBox buttons = new HBox(10, startButton, pauseButton, stepButton, exitButton);
         HBox sliderBox = new HBox(10, new Label("Velocità:"), speedSlider);
-        controlsBox.getChildren().addAll(buttons, sliderBox, statusLabel);
+        controlsBox.getChildren().addAll(buttons, sliderBox, this.statusLabel);
         controlsBox.setPadding(new Insets(10));
         root.setBottom(controlsBox);
 
         // Eventi di controllo
         startButton.setOnAction(e -> {
-            isPaused = false;
-            statusLabel.setText("In esecuzione");
-            timeline.play();
+            this.isPaused = false;
+            this.statusLabel.setText("In esecuzione");
+            this.timeline.play();
         });
         pauseButton.setOnAction(e -> {
-            isPaused = true;
-            statusLabel.setText("In pausa");
-            timeline.pause();
+            this.isPaused = true;
+            this.statusLabel.setText("In pausa");
+            this.timeline.pause();
         });
         stepButton.setOnAction(e -> {
-            if (isPaused) {
-                advanceTurn();
-                draw();
+            if (this.isPaused) {
+                this.advanceTurn();
+                this.draw();
             }
         });
         exitButton.setOnAction(e -> {
-            timeline.stop();
+            this.timeline.stop();
             Platform.exit();
         });
 
         // Timeline per aggiornamenti automatici (inizialmente ferma)
-        timeline = new Timeline(new KeyFrame(Duration.seconds(1.0 / speedSlider.getValue()), e -> {
-            if (!isPaused && !gameState.isFinished()) {
-                advanceTurn();
+        this.timeline = new Timeline(new KeyFrame(Duration.seconds(1.0 / speedSlider.getValue()), e -> {
+            if (!this.isPaused && !gameState.isFinished()) {
+                this.advanceTurn();
             }
         }));
-        timeline.setCycleCount(Timeline.INDEFINITE);
+        this.timeline.setCycleCount(Timeline.INDEFINITE);
 
         // Aggiorna la velocità in base allo slider
         speedSlider.valueProperty().addListener((obs, oldVal, newVal) -> {
-            timeline.setRate(newVal.doubleValue());
+            this.timeline.setRate(newVal.doubleValue());
         });
 
         // Aggiungi event handler per il mouse sul canvas
-        canvas.setOnMouseClicked(e -> handleMouseClick(e.getX(), e.getY()));
+        this.canvas.setOnMouseClicked(e -> this.handleMouseClick(e.getX(), e.getY()));
 
         // Inizializza le mosse valide se il primo giocatore è umano
         if (gameState.getCurrentPlayer() instanceof HumanPlayer) {
             HumanPlayer humanPlayer = (HumanPlayer) gameState.getCurrentPlayer();
-            validMoves = humanPlayer.calculateValidMoves(gameState);
+            this.validMoves = humanPlayer.calculateValidMoves(gameState);
         }
 
         Scene scene = new Scene(root);
@@ -147,20 +147,20 @@ public class GUIView extends Application {
         primaryStage.setResizable(true);
         primaryStage.show();
 
-        draw(); // Disegna lo stato iniziale
+        this.draw(); // Disegna lo stato iniziale
     }
 
     private void handleMouseClick(double mouseX, double mouseY) {
-        if (isPaused && gameState.getCurrentPlayer() instanceof HumanPlayer) {
+        if (this.isPaused && gameState.getCurrentPlayer() instanceof HumanPlayer) {
             HumanPlayer humanPlayer = (HumanPlayer) gameState.getCurrentPlayer();
 
             // Converti le coordinate del mouse in coordinate della griglia
-            int gridX = (int) (mouseX / cellSize);
-            int gridY = (int) (mouseY / cellSize);
+            int gridX = (int) (mouseX / this.cellSize);
+            int gridY = (int) (mouseY / this.cellSize);
             Position clickedPos = new Position(gridX, gridY);
 
             // Se la posizione cliccata è una mossa valida
-            if (validMoves.contains(clickedPos)) {
+            if (this.validMoves.contains(clickedPos)) {
                 // Calcola l'accelerazione necessaria per raggiungere la posizione
                 Position currentPos = humanPlayer.getPosition();
                 Vector currentVel = humanPlayer.getVelocity();
@@ -171,7 +171,7 @@ public class GUIView extends Application {
                 humanPlayer.setSelectedAcceleration(newVel);
 
                 // Esegui la mossa
-                advanceTurn();
+                this.advanceTurn();
             }
         }
     }
@@ -186,13 +186,13 @@ public class GUIView extends Application {
         // Ottieni l'accelerazione dal giocatore (BFS/A* o umano)
         Vector acceleration = currentPlayer.getNextAcceleration(gameState);
         if (acceleration == null) {
-            statusLabel.setText(currentPlayer.getName() + " non ha fornito un'accelerazione valida.");
+            this.statusLabel.setText(currentPlayer.getName() + " non ha fornito un'accelerazione valida.");
             acceleration = new Vector(0, 0);
         }
 
         // Movimento valido su muri/giocatori fermi?
-        if (!movementManager.validateMove(currentPlayer, acceleration, gameState)) {
-            statusLabel.setText(
+        if (!this.movementManager.validateMove(currentPlayer, acceleration, gameState)) {
+            this.statusLabel.setText(
                     currentPlayer.getName() + " ha colliso con un muro o giocatore fermo! Velocità resettata.");
             currentPlayer.resetVelocity();
         } else {
@@ -201,9 +201,9 @@ public class GUIView extends Application {
             Position newPosition = currentPlayer.getPosition().move(newVelocity);
 
             // Controllo "anti-sovrapposizione" con altri giocatori GIA' mossi
-            if (isPositionOccupiedByOtherPlayer(newPosition, currentPlayer)) {
+            if (this.isPositionOccupiedByOtherPlayer(newPosition, currentPlayer)) {
                 // Se la cella è già presa, il giocatore resta fermo
-                statusLabel.setText(
+                this.statusLabel.setText(
                         currentPlayer.getName() + " ha trovato la cella occupata da un altro giocatore, resta fermo!");
                 currentPlayer.resetVelocity();
             } else {
@@ -216,8 +216,8 @@ public class GUIView extends Application {
                 if (currentCell == CellType.FINISH) {
                     gameState.setFinished(true);
                     gameState.setWinner(currentPlayer);
-                    statusLabel.setText("Il Giocatore " + currentPlayer.getName() + " ha vinto la gara!");
-                    timeline.stop();
+                    this.statusLabel.setText("Il Giocatore " + currentPlayer.getName() + " ha vinto la gara!");
+                    this.timeline.stop();
 
                     // Mostra dialog di vittoria e chiudi l'applicazione
                     Platform.runLater(() -> {
@@ -236,8 +236,8 @@ public class GUIView extends Application {
         if (gameState.checkFinish(currentPlayer)) {
             gameState.setFinished(true);
             gameState.setWinner(currentPlayer);
-            statusLabel.setText("Il Giocatore " + currentPlayer.getName() + " ha vinto la gara!");
-            timeline.stop();
+            this.statusLabel.setText("Il Giocatore " + currentPlayer.getName() + " ha vinto la gara!");
+            this.timeline.stop();
 
             // Mostra dialog di vittoria e chiudi l'applicazione
             Platform.runLater(() -> {
@@ -256,12 +256,12 @@ public class GUIView extends Application {
         // Aggiorna le mosse valide se il prossimo giocatore è umano
         if (gameState.getCurrentPlayer() instanceof HumanPlayer) {
             HumanPlayer humanPlayer = (HumanPlayer) gameState.getCurrentPlayer();
-            validMoves = humanPlayer.calculateValidMoves(gameState);
+            this.validMoves = humanPlayer.calculateValidMoves(gameState);
         } else {
-            validMoves.clear();
+            this.validMoves.clear();
         }
 
-        draw();
+        this.draw();
     }
 
     /**
@@ -280,7 +280,7 @@ public class GUIView extends Application {
      * Disegna circuito e giocatori sul canvas.
      */
     private void draw() {
-        GraphicsContext gc = canvas.getGraphicsContext2D();
+        GraphicsContext gc = this.canvas.getGraphicsContext2D();
         Track track = gameState.getTrack();
 
         // Disegna il circuito
@@ -291,7 +291,7 @@ public class GUIView extends Application {
                 Position currentPos = new Position(x, y);
 
                 // Evidenzia le mosse valide per il giocatore umano
-                if (!validMoves.isEmpty() && validMoves.contains(currentPos)) {
+                if (!this.validMoves.isEmpty() && this.validMoves.contains(currentPos)) {
                     fill = Color.LIGHTGREEN;
                 } else {
                     switch (cell) {
@@ -315,9 +315,9 @@ public class GUIView extends Application {
                 }
 
                 gc.setFill(fill);
-                gc.fillRect(x * cellSize, y * cellSize, cellSize, cellSize);
+                gc.fillRect(x * this.cellSize, y * this.cellSize, this.cellSize, this.cellSize);
                 gc.setStroke(Color.BLACK);
-                gc.strokeRect(x * cellSize, y * cellSize, cellSize, cellSize);
+                gc.strokeRect(x * this.cellSize, y * this.cellSize, this.cellSize, this.cellSize);
             }
         }
 
@@ -330,10 +330,10 @@ public class GUIView extends Application {
                     player.getColor().getBlue());
             gc.setFill(pColor);
             gc.fillOval(
-                    pos.getX() * cellSize + 2,
-                    pos.getY() * cellSize + 2,
-                    cellSize - 4,
-                    cellSize - 4);
+                    pos.getX() * this.cellSize + 2,
+                    pos.getY() * this.cellSize + 2,
+                    this.cellSize - 4,
+                    this.cellSize - 4);
         }
     }
 }

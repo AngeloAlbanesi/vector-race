@@ -25,32 +25,32 @@ public class TurnManager {
      * Gestisce l'avanzamento di un turno di gioco.
      */
     public void advanceTurn() {
-        Player currentPlayer = gameState.getCurrentPlayer();
-        
+        Player currentPlayer = this.gameState.getCurrentPlayer();
+
         // Ottieni e valida l'accelerazione
-        Vector acceleration = getAndValidateAcceleration(currentPlayer);
-        
+        Vector acceleration = this.getAndValidateAcceleration(currentPlayer);
+
         // Processa il movimento
-        if (processMovement(currentPlayer, acceleration)) {
+        if (this.processMovement(currentPlayer, acceleration)) {
             // Se il movimento è valido, verifica la vittoria
-            if (checkVictoryConditions(currentPlayer)) {
-                endGame(currentPlayer);
+            if (this.checkVictoryConditions(currentPlayer)) {
+                this.endGame(currentPlayer);
                 return;
             }
         }
 
         // Passa al prossimo turno
-        gameState.nextTurn();
-        view.displayGameState(gameState);
+        this.gameState.nextTurn();
+        this.view.displayGameState(this.gameState);
     }
 
     /**
      * Ottiene e valida l'accelerazione dal giocatore.
      */
     private Vector getAndValidateAcceleration(Player player) {
-        Vector acceleration = player.getNextAcceleration(gameState);
+        Vector acceleration = player.getNextAcceleration(this.gameState);
         if (acceleration == null) {
-            view.displayMessage(player.getName() + " non ha fornito un'accelerazione valida.");
+            this.view.displayMessage(player.getName() + " non ha fornito un'accelerazione valida.");
             return new Vector(0, 0);
         }
         return acceleration;
@@ -58,12 +58,13 @@ public class TurnManager {
 
     /**
      * Processa il movimento del giocatore.
+     * 
      * @return true se il movimento è stato completato con successo
      */
     private boolean processMovement(Player player, Vector acceleration) {
         // Valida il movimento
-        if (!movementManager.validateMove(player, acceleration, gameState)) {
-            handleCollision(player);
+        if (!this.movementManager.validateMove(player, acceleration, this.gameState)) {
+            this.handleCollision(player);
             return false;
         }
 
@@ -72,8 +73,8 @@ public class TurnManager {
         Position newPosition = player.getPosition().move(newVelocity);
 
         // Verifica sovrapposizione con altri giocatori
-        if (isPositionOccupied(newPosition, player)) {
-            handleOccupiedPosition(player);
+        if (this.isPositionOccupied(newPosition, player)) {
+            this.handleOccupiedPosition(player);
             return false;
         }
 
@@ -87,7 +88,7 @@ public class TurnManager {
      * Verifica se una posizione è occupata da altri giocatori.
      */
     private boolean isPositionOccupied(Position position, Player currentPlayer) {
-        return gameState.getPlayers().stream()
+        return this.gameState.getPlayers().stream()
                 .anyMatch(other -> other != currentPlayer && other.getPosition().equals(position));
     }
 
@@ -95,7 +96,7 @@ public class TurnManager {
      * Gestisce una collisione con un muro o ostacolo.
      */
     private void handleCollision(Player player) {
-        view.displayMessage(player.getName() + " ha colliso con un muro o giocatore fermo! Velocità resettata.");
+        this.view.displayMessage(player.getName() + " ha colliso con un muro o giocatore fermo! Velocità resettata.");
         player.resetVelocity();
     }
 
@@ -103,7 +104,8 @@ public class TurnManager {
      * Gestisce il caso di una posizione occupata da un altro giocatore.
      */
     private void handleOccupiedPosition(Player player) {
-        view.displayMessage(player.getName() + " ha trovato la cella occupata da un altro giocatore, resta fermo!");
+        this.view
+                .displayMessage(player.getName() + " ha trovato la cella occupata da un altro giocatore, resta fermo!");
         player.resetVelocity();
     }
 
@@ -112,17 +114,17 @@ public class TurnManager {
      */
     private boolean checkVictoryConditions(Player player) {
         Position pos = player.getPosition();
-        return gameState.getTrack().getCell(pos.getX(), pos.getY()) == CellType.FINISH || 
-               gameState.checkFinish(player);
+        return this.gameState.getTrack().getCell(pos.getX(), pos.getY()) == CellType.FINISH ||
+                this.gameState.checkFinish(player);
     }
 
     /**
      * Gestisce la fine del gioco quando un giocatore vince.
      */
     private void endGame(Player winner) {
-        gameState.setFinished(true);
-        gameState.setWinner(winner);
-        view.displayMessage("Il Giocatore " + winner.getName() + " ha vinto la gara!");
-        view.displayGameState(gameState);
+        this.gameState.setFinished(true);
+        this.gameState.setWinner(winner);
+        this.view.displayMessage("Il Giocatore " + winner.getName() + " ha vinto la gara!");
+        this.view.displayGameState(this.gameState);
     }
 }

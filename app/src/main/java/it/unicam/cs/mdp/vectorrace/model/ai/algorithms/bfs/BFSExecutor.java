@@ -1,7 +1,5 @@
 package it.unicam.cs.mdp.vectorrace.model.ai.algorithms.bfs;
 
-import java.util.*;
-
 import it.unicam.cs.mdp.vectorrace.model.ai.services.IMoveValidator;
 import it.unicam.cs.mdp.vectorrace.model.core.AccelerationType;
 import it.unicam.cs.mdp.vectorrace.model.core.Position;
@@ -10,7 +8,7 @@ import it.unicam.cs.mdp.vectorrace.model.core.Vector;
 
 /**
  * Classe responsabile dell'esecuzione dell'algoritmo BFS.
- * Separa la logica di ricerca dalla strategia principale.
+ * Implementa la logica di ricerca delegando la gestione dello stato al BFSStateManager.
  */
 public class BFSExecutor {
     private static final int MAX_SPEED = 4;
@@ -21,57 +19,22 @@ public class BFSExecutor {
     }
 
     /**
-     * Risultato della ricerca BFS
-     */
-    public static class SearchResult {
-        private final Vector nextAcceleration;
-        private final boolean found;
-
-        public SearchResult(Vector nextAcceleration, boolean found) {
-            this.nextAcceleration = nextAcceleration;
-            this.found = found;
-        }
-
-        public Vector getNextAcceleration() {
-            return nextAcceleration;
-        }
-
-        public boolean isFound() {
-            return found;
-        }
-    }
-
-    /**
      * Esegue la ricerca BFS per trovare il percorso verso il target.
      */
-    public SearchResult search(Position start, Vector startVelocity, Position target, Track track) {
-        SearchState state = initializeSearch(start, startVelocity);
+    public BFSSearchResult search(Position start, Vector startVelocity, Position target, Track track) {
+        BFSStateManager stateManager = new BFSStateManager(start, startVelocity);
         
-        while (!state.queue.isEmpty()) {
-            BFSNode currentNode = state.queue.poll();
+        while (!stateManager.isQueueEmpty()) {
+            BFSNode currentNode = stateManager.getNextNode();
             
             if (isTargetReached(currentNode, target)) {
-                return reconstructPath(currentNode, state.startNode);
+                return reconstructPath(currentNode, stateManager.getStartNode());
             }
             
-            processNeighbors(currentNode, state, track);
+            processNeighbors(currentNode, stateManager, track);
         }
         
-        return new SearchResult(new Vector(0, 0), false);
-    }
-
-    /**
-     * Inizializza lo stato della ricerca.
-     */
-    private SearchState initializeSearch(Position start, Vector startVelocity) {
-        Queue<BFSNode> queue = new LinkedList<>();
-        Set<BFSNode> visited = new HashSet<>();
-        BFSNode startNode = new BFSNode(start, startVelocity, null, null);
-        
-        queue.add(startNode);
-        visited.add(startNode);
-        
-        return new SearchState(queue, visited, startNode);
+        return new BFSSearchResult(new Vector(0, 0), false);
     }
 
     /**
@@ -84,13 +47,12 @@ public class BFSExecutor {
     /**
      * Processa tutti i nodi vicini del nodo corrente.
      */
-    private void processNeighbors(BFSNode currentNode, SearchState state, Track track) {
+    private void processNeighbors(BFSNode currentNode, BFSStateManager stateManager, Track track) {
         for (Vector acceleration : AccelerationType.getAllVectors()) {
             BFSNode neighbor = generateNeighbor(currentNode, acceleration);
             
-            if (neighbor != null && isValidMove(neighbor, track) && !state.visited.contains(neighbor)) {
-                state.visited.add(neighbor);
-                state.queue.add(neighbor);
+            if (neighbor != null && isValidMove(neighbor, track)) {
+                stateManager.addNode(neighbor);
             }
         }
     }
@@ -102,7 +64,7 @@ public class BFSExecutor {
     private BFSNode generateNeighbor(BFSNode currentNode, Vector acceleration) {
         Vector newVelocity = currentNode.getVelocity().add(acceleration);
         
-        if (Math.abs(newVelocity.getDx()) > MAX_SPEED || 
+        if (Math.abs(newVelocity.getDx()) > MAX_SPEED ||
             Math.abs(newVelocity.getDy()) > MAX_SPEED) {
             return null;
         }
@@ -125,31 +87,16 @@ public class BFSExecutor {
     /**
      * Ricostruisce il percorso dal nodo goal fino allo start.
      */
-    private SearchResult reconstructPath(BFSNode goalNode, BFSNode startNode) {
+    private BFSSearchResult reconstructPath(BFSNode goalNode, BFSNode startNode) {
         BFSNode current = goalNode;
         
         while (current.getParent() != null && current.getParent() != startNode) {
             current = current.getParent();
         }
 
-        Vector acceleration = (current.getAccApplied() != null) ? 
+        Vector acceleration = (current.getAccApplied() != null) ?
             current.getAccApplied() : new Vector(0, 0);
             
-        return new SearchResult(acceleration, true);
-    }
-
-    /**
-     * Classe di supporto per mantenere lo stato della ricerca.
-     */
-    private static class SearchState {
-        final Queue<BFSNode> queue;
-        final Set<BFSNode> visited;
-        final BFSNode startNode;
-
-        SearchState(Queue<BFSNode> queue, Set<BFSNode> visited, BFSNode startNode) {
-            this.queue = queue;
-            this.visited = visited;
-            this.startNode = startNode;
-        }
+        return new BFSSearchResult(acceleration, true);
     }
 }

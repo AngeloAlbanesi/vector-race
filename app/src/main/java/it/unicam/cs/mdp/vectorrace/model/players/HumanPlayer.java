@@ -41,27 +41,27 @@ public class HumanPlayer extends Player {
      * @return Set di posizioni valide
      */
     public Set<Position> calculateValidMoves(GameState gameState) {
-        validMoves.clear();
+        this.validMoves.clear();
         // Controllo delle 8 direzioni possibili (-1,0,1 per x e y)
         for (int dx = -1; dx <= 1; dx++) {
             for (int dy = -1; dy <= 1; dy++) {
                 Vector acceleration = new Vector(dx, dy);
-                Vector newVelocity = getVelocity().add(acceleration);
-                Position newPosition = getPosition().move(newVelocity);
+                Vector newVelocity = this.getVelocity().add(acceleration);
+                Position newPosition = this.getPosition().move(newVelocity);
 
-                if (movementManager.validateMove(this, acceleration, gameState)) {
-                    validMoves.add(newPosition);
+                if (this.movementManager.validateMove(this, acceleration, gameState)) {
+                    this.validMoves.add(newPosition);
                 }
             }
         }
-        return validMoves;
+        return this.validMoves;
     }
 
     /**
      * Verifica se una posizione è una mossa valida.
      */
     public boolean isValidMove(Position position) {
-        return validMoves.contains(position);
+        return this.validMoves.contains(position);
     }
 
     /**
@@ -80,9 +80,7 @@ public class HumanPlayer extends Player {
 
     @Override
     public Vector getNextAcceleration(GameState gameState) {
-        // Restituisce l'accelerazione selezionata dall'utente o (0,0) se nessuna
-        // selezione
-        return selectedAcceleration != null ? selectedAcceleration : new Vector(0, 0);
+        return this.selectedAcceleration != null ? this.selectedAcceleration : new Vector(0, 0);
     }
 
     /**

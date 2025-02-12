@@ -35,41 +35,41 @@ public class AStarNode {
     }
 
     public Position getPosition() {
-        return position;
+        return this.position;
     }
 
     public Vector getVelocity() {
-        return velocity;
+        return this.velocity;
     }
 
     public AStarNode getParent() {
-        return parent;
+        return this.parent;
     }
 
     public Vector getAppliedAcceleration() {
-        return appliedAcceleration;
+        return this.appliedAcceleration;
     }
 
     public double getGCost() {
-        return gCost;
+        return this.gCost;
     }
 
     public void setGCost(double gCost) {
         this.gCost = gCost;
-        updateFCost();
+        this.updateFCost();
     }
 
     public double getHCost() {
-        return hCost;
+        return this.hCost;
     }
 
     public void setHCost(double hCost) {
         this.hCost = hCost;
-        updateFCost();
+        this.updateFCost();
     }
 
     public double getFCost() {
-        return fCost;
+        return this.fCost;
     }
 
     private void updateFCost() {
@@ -88,6 +88,6 @@ public class AStarNode {
 
     @Override
     public int hashCode() {
-        return position.hashCode() * 31 + velocity.hashCode();
+        return this.position.hashCode() * 31 + this.velocity.hashCode();
     }
 }

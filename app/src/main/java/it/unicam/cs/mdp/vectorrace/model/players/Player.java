@@ -29,27 +29,27 @@ public abstract class Player {
     }
 
     public String getName() {
-        return name;
+        return this.name;
     }
 
     public Color getColor() {
-        return color;
+        return this.color;
     }
 
     public Position getPosition() {
-        return position;
+        return this.position;
     }
 
     public Vector getVelocity() {
-        return velocity;
+        return this.velocity;
     }
 
     public int getNextCheckpointIndex() {
-        return nextCheckpointIndex;
+        return this.nextCheckpointIndex;
     }
 
     public void incrementCheckpointIndex() {
-        nextCheckpointIndex++;
+        this.nextCheckpointIndex++;
     }
 
     public abstract Vector getNextAcceleration(GameState gameState);
@@ -69,6 +69,6 @@ public abstract class Player {
 
     @Override
     public String toString() {
-        return name + " in " + position + " con velocità " + velocity;
+        return this.name + " in " + this.position + " con velocità " + this.velocity;
     }
 }

@@ -22,11 +22,11 @@ public class Vector {
     }
 
     public int getDx() {
-        return dx;
+        return this.dx;
     }
 
     public int getDy() {
-        return dy;
+        return this.dy;
     }
 
     /**
@@ -55,16 +55,16 @@ public class Vector {
      * @return true se il vettore è nullo, false altrimenti
      */
     public boolean isZero() {
-        return dx == 0 && dy == 0;
+        return this.dx == 0 && this.dy == 0;
     }
 
     public int getMaxSpeed() {
-        return Math.max(Math.abs(dx), Math.abs(dy));
+        return Math.max(Math.abs(this.dx), Math.abs(this.dy));
     }
 
     @Override
     public String toString() {
-        return "(" + dx + ", " + dy + ")";
+        return "(" + this.dx + ", " + this.dy + ")";
     }
 
     @Override
@@ -74,11 +74,11 @@ public class Vector {
         if (o == null || getClass() != o.getClass())
             return false;
         Vector vector = (Vector) o;
-        return dx == vector.dx && dy == vector.dy;
+        return this.dx == vector.dx && this.dy == vector.dy;
     }
 
     @Override
     public int hashCode() {
-        return 31 * dx + dy;
+        return 31 * this.dx + this.dy;
     }
 }

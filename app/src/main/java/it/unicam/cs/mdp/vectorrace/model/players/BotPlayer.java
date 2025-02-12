@@ -23,20 +23,20 @@ public class BotPlayer extends Player {
 
     @Override
     public Vector getNextAcceleration(GameState gameState) {
-        logDebug("Calcolo prossima accelerazione");
-        logDebug("Posizione attuale: " + getPosition());
-        logDebug("Velocità attuale: " + getVelocity());
-        logDebug("Prossimo checkpoint: " + getNextCheckpointIndex());
+        this.logDebug("Calcolo prossima accelerazione");
+        this.logDebug("Posizione attuale: " + this.getPosition());
+        this.logDebug("Velocità attuale: " + this.getVelocity());
+        this.logDebug("Prossimo checkpoint: " + this.getNextCheckpointIndex());
 
-        Vector acceleration = strategy.getNextAcceleration(this, gameState);
-        logDebug("Accelerazione calcolata: " + acceleration);
+        Vector acceleration = this.strategy.getNextAcceleration(this, gameState);
+        this.logDebug("Accelerazione calcolata: " + acceleration);
 
         return acceleration;
     }
 
     private void logDebug(String message) {
         String timestamp = LocalDateTime.now().format(LOG_FORMATTER);
-        System.out.printf("[BOT %s - %s] %s%n", getName(), timestamp, message);
+        System.out.printf("[BOT %s - %s] %s%n", this.getName(), timestamp, message);
     }
 
     public AIStrategy getStrategy() {
