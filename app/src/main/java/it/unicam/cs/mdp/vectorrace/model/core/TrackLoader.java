@@ -25,32 +25,92 @@ public class TrackLoader {
      */
     public static Track loadTrack(String path) throws IOException {
         List<String> lines = readLines(path);
+        validateTrackFile(lines);
+        
+        int height = lines.size();
+        int width = lines.get(0).length();
+        
+        CellType[][] grid = createEmptyGrid(height, width);
+        Map<Position, PriorityData> checkpointData = new HashMap<>();
+        
+        populateGridAndCheckpoints(grid, checkpointData, lines);
+        
+        return new Track(grid, checkpointData);
+    }
+
+    /**
+     * Valida il file del circuito.
+     *
+     * @param lines Le linee del file
+     * @throws IOException Se il file non è valido
+     */
+    private static void validateTrackFile(List<String> lines) throws IOException {
         if (lines.isEmpty()) {
             throw new IOException("Il file del circuito è vuoto");
         }
+    }
 
-        int height = lines.size();
-        int width = lines.get(0).length();
-        CellType[][] grid = new CellType[height][width];
-        Map<Position, PriorityData> checkpointData = new HashMap<>();
+    /**
+     * Crea una griglia vuota con le dimensioni specificate.
+     *
+     * @param height Altezza della griglia
+     * @param width Larghezza della griglia
+     * @return La griglia creata
+     */
+    private static CellType[][] createEmptyGrid(int height, int width) {
+        return new CellType[height][width];
+    }
 
-        for (int y = 0; y < height; y++) {
+    /**
+     * Popola la griglia e i dati dei checkpoint.
+     *
+     * @param grid La griglia da popolare
+     * @param checkpointData I dati dei checkpoint
+     * @param lines Le linee del file
+     */
+    private static void populateGridAndCheckpoints(CellType[][] grid, Map<Position, PriorityData> checkpointData, List<String> lines) {
+        for (int y = 0; y < grid.length; y++) {
             String line = lines.get(y);
-            for (int x = 0; x < width; x++) {
-                char c = line.charAt(x);
-                if (Character.isDigit(c)) {
-                    grid[y][x] = CellType.CHECKPOINT;
-                    int checkpointNumber = Character.getNumericValue(c);
-                    checkpointData.put(
-                            new Position(x, y),
-                            new PriorityData(calculatePriorityLevel(checkpointNumber), checkpointNumber));
-                } else {
-                    grid[y][x] = CellType.fromChar(c);
-                }
+            for (int x = 0; x < grid[y].length; x++) {
+                processCellCharacter(grid, checkpointData, line.charAt(x), x, y);
             }
         }
+    }
 
-        return new Track(grid, checkpointData);
+    /**
+     * Processa un carattere della griglia e aggiorna la cella corrispondente.
+     *
+     * @param grid La griglia
+     * @param checkpointData I dati dei checkpoint
+     * @param c Il carattere da processare
+     * @param x La coordinata x
+     * @param y La coordinata y
+     */
+    private static void processCellCharacter(CellType[][] grid, Map<Position, PriorityData> checkpointData,
+            char c, int x, int y) {
+        if (Character.isDigit(c)) {
+            processCheckpoint(grid, checkpointData, c, x, y);
+        } else {
+            grid[y][x] = CellType.fromChar(c);
+        }
+    }
+
+    /**
+     * Processa un checkpoint e aggiorna la griglia e i dati dei checkpoint.
+     *
+     * @param grid La griglia
+     * @param checkpointData I dati dei checkpoint
+     * @param c Il carattere del checkpoint
+     * @param x La coordinata x
+     * @param y La coordinata y
+     */
+    private static void processCheckpoint(CellType[][] grid, Map<Position, PriorityData> checkpointData,
+            char c, int x, int y) {
+        grid[y][x] = CellType.CHECKPOINT;
+        int checkpointNumber = Character.getNumericValue(c);
+        checkpointData.put(
+                new Position(x, y),
+                new PriorityData(calculatePriorityLevel(checkpointNumber), checkpointNumber));
     }
 
     /**
