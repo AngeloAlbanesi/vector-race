@@ -1,135 +1,88 @@
 package it.unicam.cs.mdp.vectorrace.view;
 
-import it.unicam.cs.mdp.vectorrace.model.core.Position;
-import it.unicam.cs.mdp.vectorrace.model.core.Track;
 import it.unicam.cs.mdp.vectorrace.model.game.GameState;
-import it.unicam.cs.mdp.vectorrace.model.players.Player;
-import it.unicam.cs.mdp.vectorrace.model.core.CellType;
+import it.unicam.cs.mdp.vectorrace.view.output.IOutputHandler;
+import it.unicam.cs.mdp.vectorrace.view.output.ConsoleOutputHandler;
+import it.unicam.cs.mdp.vectorrace.view.renderer.IGameRenderer;
+import it.unicam.cs.mdp.vectorrace.view.renderer.CLIGameRenderer;
+import it.unicam.cs.mdp.vectorrace.view.renderer.IPlayerInfoFormatter;
+import it.unicam.cs.mdp.vectorrace.view.renderer.CLIPlayerInfoFormatter;
 
 /**
  * Implementazione CLI dell'interfaccia di visualizzazione del gioco.
- * Implementa sia GameView per le funzionalità base che CLISpecific per le funzionalità specifiche della CLI.
+ * Utilizza il pattern Strategy per delegare le responsabilità di rendering e output
+ * a componenti specializzati.
  */
 public class CLIView implements GameView, CLISpecific {
-    private boolean isGameRunning = false;
+    private final IOutputHandler outputHandler;
+    private final IGameRenderer gameRenderer;
+    private boolean isGameRunning;
+
+    /**
+     * Costruisce una nuova istanza di CLIView con i componenti necessari.
+     */
+    public CLIView() {
+        this.outputHandler = new ConsoleOutputHandler();
+        IPlayerInfoFormatter playerInfoFormatter = new CLIPlayerInfoFormatter();
+        this.gameRenderer = new CLIGameRenderer(playerInfoFormatter);
+        this.isGameRunning = false;
+    }
 
     @Override
     public void displayMessage(String message) {
-        System.out.println(message);
-        System.out.flush(); // Forza l'output immediato
+        outputHandler.displayLine(message);
     }
 
     @Override
     public void showCircuitSelection() {
-        System.out.println("\n=== Vector Race - Selezione Circuito ===");
-        System.out.println("1. Circuito 1");
-        System.out.println("2. Circuito 2");
-        System.out.println("3. Circuito 3");
-        System.out.print("Seleziona un circuito (1-3): ");
-        System.out.flush(); // Forza l'output immediato
+        outputHandler.displayLine("\n=== Vector Race - Selezione Circuito ===");
+        outputHandler.displayLine("1. Circuito 1");
+        outputHandler.displayLine("2. Circuito 2");
+        outputHandler.displayLine("3. Circuito 3");
+        outputHandler.display("Seleziona un circuito (1-3): ");
     }
 
     @Override
     public void showGameMenu() {
-        System.out.println("\n=== Menu di Gioco ===");
-        System.out.println("1. Avvia simulazione");
-        System.out.println("2. Avanza di un turno");
-        System.out.print("Seleziona un'opzione (1-2): ");
-        System.out.flush(); // Forza l'output immediato
+        outputHandler.displayLine("\n=== Menu di Gioco ===");
+        outputHandler.displayLine("1. Avvia simulazione");
+        outputHandler.displayLine("2. Avanza di un turno");
+        outputHandler.display("Seleziona un'opzione (1-2): ");
     }
 
     @Override
     public void displayGameState(GameState gameState) {
-        Track track = gameState.getTrack();
-        int width = track.getWidth();
-        int height = track.getHeight();
-        String[][] grid = new String[height][width];
-
-        // Inizializza la griglia in base al tipo di cella
-        for (int y = 0; y < height; y++) {
-            for (int x = 0; x < width; x++) {
-                CellType cell = track.getCell(x, y);
-                switch (cell) {
-                    case WALL:
-                        grid[y][x] = "#";
-                        break;
-                    case ROAD:
-                    case CHECKPOINT:
-                        grid[y][x] = ".";
-                        break;
-                    case START:
-                        grid[y][x] = "S";
-                        break;
-                    case FINISH:
-                        grid[y][x] = "*";
-                        break;
-                }
-            }
+        // Pulisce lo schermo prima di mostrare il nuovo stato
+        outputHandler.clearScreen();
+        
+        // Utilizza il renderer per generare la rappresentazione del gioco
+        String gameStateRepresentation = gameRenderer.renderGameState(gameState);
+        outputHandler.displayLine(gameStateRepresentation);
+        
+        // Se il gioco è finito, gestisce la terminazione
+        if (gameState.isFinished() && gameState.getWinner() != null) {
+            handleGameEnd();
+        } else {
+            // Altrimenti mostra il menu di gioco
+            showGameMenu();
         }
-
-        // Sovrapponi i giocatori (utilizzando il numero dal nome del bot)
-        for (Player player : gameState.getPlayers()) {
-            Position pos = player.getPosition();
-            if (track.isWithinBounds(pos.getX(), pos.getY())) {
-                // Estrai il numero dal nome del bot (es: "Bot1" -> "1")
-                String playerNumber = player.getName().replaceAll("\\D+", "");
-                grid[pos.getY()][pos.getX()] = playerNumber;
-            }
-        }
-
-        // Stampa lo stato del gioco
-        clearScreen();
-        System.out.println("=== Stato attuale del circuito ===");
-        for (int y = 0; y < height; y++) {
-            StringBuilder line = new StringBuilder();
-            for (int x = 0; x < width; x++) {
-                line.append(grid[y][x]);
-            }
-            System.out.println(line.toString());
-            System.out.flush(); // Forza l'output di ogni riga
-        }
-
-        // Stampa informazioni dei giocatori
-        System.out.println("\n=== Stato dei giocatori ===");
-        for (Player player : gameState.getPlayers()) {
-            System.out.printf("%s: Posizione=%s, Velocità=%s, Checkpoint=%d%n",
-                    player.getName(),
-                    player.getPosition(),
-                    player.getVelocity(),
-                    player.getNextCheckpointIndex());
-            System.out.flush(); // Forza l'output di ogni riga di stato
-        }
-
-        if (gameState.isFinished()) {
-            Player winner = gameState.getWinner();
-            if (winner != null) {
-                System.out.println("\n🏆 Il Giocatore " + winner.getName() + " ha vinto la gara! 🏆");
-                System.out.flush();
-                // Aspetta un secondo per assicurarsi che l'utente veda il messaggio
-                try {
-                    Thread.sleep(1000);
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                }
-                // Forza la terminazione del programma
-                System.exit(0);
-            }
-        }
-
-        // Mostra automaticamente il menu dopo lo stato del gioco
-        showGameMenu();
-
-        // Lascia una riga vuota per separare lo stato dal menu
-        System.out.println();
-        System.out.flush();
+        
+        // Aggiunge una riga vuota per separare lo stato dal menu
+        outputHandler.displayLine("");
     }
 
     /**
-     * Pulisce lo schermo del terminale
+     * Gestisce la terminazione del gioco.
      */
-    private void clearScreen() {
-        System.out.print("\033[H\033[2J");
-        System.out.flush();
+    private void handleGameEnd() {
+        // Aspetta un secondo per assicurarsi che l'utente veda il messaggio
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+        // Forza la terminazione del programma
+        System.exit(0);
     }
 
     @Override
