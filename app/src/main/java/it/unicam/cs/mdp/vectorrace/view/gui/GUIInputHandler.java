@@ -79,11 +79,15 @@ public class GUIInputHandler {
      * Gestisce il click del mouse sulla griglia di gioco.
      */
     public void handleGridClick(double mouseX, double mouseY, int cellSize, GameState gameState, Set<Position> validMoves) {
-        if (!isPaused && !(gameState.getCurrentPlayer() instanceof HumanPlayer)) {
+        Player currentPlayer = gameState.getCurrentPlayer();
+        
+        // Verifica se il gioco è in pausa o se il giocatore non è umano
+        if (!isPaused || !(currentPlayer instanceof HumanPlayer)) {
             return;
         }
 
-        HumanPlayer humanPlayer = (HumanPlayer) gameState.getCurrentPlayer();
+        // Ora possiamo fare il cast in sicurezza
+        HumanPlayer humanPlayer = (HumanPlayer) currentPlayer;
         Position clickedPos = new Position(
             (int) (mouseX / cellSize),
             (int) (mouseY / cellSize)

@@ -27,6 +27,13 @@ public class GUIView extends Application {
     private GUIInputHandler inputHandler;
     private GUIGameStateManager stateManager;
     private Timeline gameLoop;
+    private Canvas canvas;
+    private Label statusLabel;
+    private Button startButton;
+    private Button pauseButton;
+    private Button stepButton;
+    private Button exitButton;
+    private Slider speedSlider;
 
     /**
      * Imposta lo stato di gioco da visualizzare.
@@ -46,36 +53,60 @@ public class GUIView extends Application {
         initializeComponents(primaryStage);
     }
 
+    /**
+     * Inizializza tutti i componenti dell'interfaccia grafica.
+     * Questo metodo è stato suddiviso in metodi helper più piccoli per migliorare la manutenibilità.
+     */
     private void initializeComponents(Stage primaryStage) {
-        // Calcola le dimensioni ottimali della finestra
         int cellSize = calculateOptimalCellSize();
-        
-        // Crea i componenti UI
+        BorderPane root = setupUIComponents(cellSize);
+        initializeGameLoop(cellSize);
+        initializeManagers();
+        configureEventHandlers(cellSize);
+        setupStage(primaryStage, root);
+        // Renderizza solo lo stato iniziale senza avanzare il turno
+        renderer.render(gameState, stateManager.getValidMoves());
+    }
+
+    /**
+     * Crea e configura tutti i componenti dell'interfaccia utente.
+     */
+    private BorderPane setupUIComponents(int cellSize) {
         GUIComponentFactory componentFactory = new GUIComponentFactory();
         BorderPane root = componentFactory.createMainLayout();
         
-        // Crea il canvas e il renderer
-        Canvas canvas = componentFactory.createGameCanvas(gameState.getTrack(), cellSize);
+        // Configurazione canvas e renderer
+        canvas = componentFactory.createGameCanvas(gameState.getTrack(), cellSize);
         root.setCenter(canvas);
         this.renderer = new GUIRenderer(canvas, cellSize);
 
-        // Crea i controlli
-        Label statusLabel = componentFactory.createStatusLabel();
-        Button startButton = componentFactory.createStartButton();
-        Button pauseButton = componentFactory.createPauseButton();
-        Button stepButton = componentFactory.createStepButton();
-        Button exitButton = componentFactory.createExitButton();
-        Slider speedSlider = componentFactory.createSpeedSlider();
+        // Creazione controlli UI
+        statusLabel = componentFactory.createStatusLabel();
+        startButton = componentFactory.createStartButton();
+        pauseButton = componentFactory.createPauseButton();
+        stepButton = componentFactory.createStepButton();
+        exitButton = componentFactory.createExitButton();
+        speedSlider = componentFactory.createSpeedSlider();
 
-        // Crea il pannello dei controlli
+        // Configurazione pannello controlli
         root.setBottom(componentFactory.createControlPanel(
             startButton, pauseButton, stepButton, exitButton, speedSlider, statusLabel
         ));
 
-        // Inizializza il game loop
-        this.gameLoop = createGameLoop(speedSlider.getValue());
+        return root;
+    }
 
-        // Inizializza i gestori
+    /**
+     * Inizializza il game loop con la velocità di default.
+     */
+    private void initializeGameLoop(int cellSize) {
+        this.gameLoop = createGameLoop(GUIConstants.DEFAULT_SPEED);
+    }
+
+    /**
+     * Inizializza i gestori per lo stato del gioco e l'input.
+     */
+    private void initializeManagers() {
         this.stateManager = new GUIGameStateManager(
             gameState,
             new MovementManager(),
@@ -87,24 +118,30 @@ public class GUIView extends Application {
             statusLabel,
             v -> updateGame()
         );
+    }
 
-        // Configura gli eventi
+    /**
+     * Configura gli handler degli eventi per i controlli UI.
+     */
+    private void configureEventHandlers(int cellSize) {
         inputHandler.setupGameControls(
             startButton, pauseButton, stepButton, exitButton, speedSlider
         );
+
         canvas.setOnMouseClicked(e -> inputHandler.handleGridClick(
             e.getX(), e.getY(), cellSize, gameState, stateManager.getValidMoves()
         ));
+    }
 
-        // Configura e mostra la finestra
+    /**
+     * Configura e mostra la finestra principale del gioco.
+     */
+    private void setupStage(Stage primaryStage, BorderPane root) {
         Scene scene = new Scene(root);
         primaryStage.setTitle("Vector Rally - Simulazione");
         primaryStage.setScene(scene);
         primaryStage.setResizable(true);
         primaryStage.show();
-
-        // Renderizza lo stato iniziale
-        updateGame();
     }
 
     private Timeline createGameLoop(double initialSpeed) {
