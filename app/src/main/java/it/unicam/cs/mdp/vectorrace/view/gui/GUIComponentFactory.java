@@ -12,10 +12,11 @@ import javafx.scene.layout.VBox;
 
 /**
  * Factory per la creazione dei componenti dell'interfaccia grafica.
- * Centralizza la creazione di tutti gli elementi UI per una migliore manutenibilità.
+ * Centralizza la creazione di tutti gli elementi UI per una migliore
+ * manutenibilità.
  */
 public class GUIComponentFactory {
-    
+
     /**
      * Crea il layout principale dell'applicazione.
      */
@@ -28,34 +29,33 @@ public class GUIComponentFactory {
      */
     public Canvas createGameCanvas(Track track, int cellSize) {
         return new Canvas(
-            track.getWidth() * cellSize,
-            track.getHeight() * cellSize
-        );
+                track.getWidth() * cellSize,
+                track.getHeight() * cellSize);
     }
 
     /**
      * Crea il pannello dei controlli di gioco.
      */
-    public VBox createControlPanel(Button startButton, Button pauseButton, 
-                                 Button stepButton, Button exitButton,
-                                 Slider speedSlider, Label statusLabel) {
+    public VBox createControlPanel(Button startButton, Button pauseButton,
+            Button stepButton, Button exitButton,
+            Slider speedSlider, Label statusLabel) {
         HBox buttons = createButtonPanel(startButton, pauseButton, stepButton, exitButton);
         HBox sliderBox = createSpeedControl(speedSlider);
-        
+
         VBox controlsBox = new VBox(GUIConstants.CONTROL_SPACING);
         controlsBox.setPadding(new Insets(GUIConstants.CONTROL_PADDING));
         controlsBox.getChildren().addAll(buttons, sliderBox, statusLabel);
-        
+
         return controlsBox;
     }
 
     /**
      * Crea il pannello dei pulsanti di controllo.
      */
-    public HBox createButtonPanel(Button startButton, Button pauseButton, 
-                                Button stepButton, Button exitButton) {
-        return new HBox(GUIConstants.CONTROL_SPACING, 
-                       startButton, pauseButton, stepButton, exitButton);
+    public HBox createButtonPanel(Button startButton, Button pauseButton,
+            Button stepButton, Button exitButton) {
+        return new HBox(GUIConstants.CONTROL_SPACING,
+                startButton, pauseButton, stepButton, exitButton);
     }
 
     /**
@@ -99,10 +99,9 @@ public class GUIComponentFactory {
      */
     public Slider createSpeedSlider() {
         Slider slider = new Slider(
-            GUIConstants.MIN_SPEED,
-            GUIConstants.MAX_SPEED,
-            GUIConstants.DEFAULT_SPEED
-        );
+                GUIConstants.MIN_SPEED,
+                GUIConstants.MAX_SPEED,
+                GUIConstants.DEFAULT_SPEED);
         slider.setShowTickLabels(true);
         slider.setShowTickMarks(true);
         return slider;

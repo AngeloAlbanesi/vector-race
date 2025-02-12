@@ -2,8 +2,6 @@ package it.unicam.cs.mdp.vectorrace.view.cli;
 
 import it.unicam.cs.mdp.vectorrace.config.CLIConfig;
 import it.unicam.cs.mdp.vectorrace.view.CLIView;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 
 /**
  * Gestisce la selezione del circuito di gioco tramite interfaccia CLI.
