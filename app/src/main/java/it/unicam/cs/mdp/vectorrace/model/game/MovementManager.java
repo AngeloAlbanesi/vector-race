@@ -1,141 +1,73 @@
 package it.unicam.cs.mdp.vectorrace.model.game;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.List;
+import java.util.ArrayList;
 
-import it.unicam.cs.mdp.vectorrace.model.core.CellType;
 import it.unicam.cs.mdp.vectorrace.model.core.Position;
 import it.unicam.cs.mdp.vectorrace.model.core.Track;
 import it.unicam.cs.mdp.vectorrace.model.core.Vector;
+import it.unicam.cs.mdp.vectorrace.model.game.validators.MoveValidator;
+import it.unicam.cs.mdp.vectorrace.model.game.validators.WallCollisionValidator;
 import it.unicam.cs.mdp.vectorrace.model.players.Player;
 
 /**
- * Gestisce i controlli di validita' dei movimenti sul circuito (muri e
- * collisioni).
+ * Gestisce la validazione dei movimenti nel gioco delegando ai validatori specifici.
  */
 public class MovementManager {
-
+    
+    private final List<MoveValidator> validators;
+    private final WallCollisionValidator wallValidator;
+    
     /**
-     * Verifica se un giocatore puo' effettuare la mossa (accelerazione),
-     * controllando muri e giocatori fermi.
+     * Costruttore di default che utilizza la factory per inizializzare i validatori standard.
+     */
+    public MovementManager() {
+        MovementManager defaultManager = MovementManagerFactory.createDefault();
+        this.validators = defaultManager.validators;
+        // Il primo validatore è sempre WallCollisionValidator per convenzione
+        this.wallValidator = (WallCollisionValidator) validators.get(0);
+    }
+    
+    /**
+     * Costruttore che accetta una lista di validatori.
+     * Implementa la Dependency Injection per maggiore flessibilità.
+     *
+     * @param validators lista dei validatori da utilizzare
+     */
+    public MovementManager(List<MoveValidator> validators) {
+        if (!(validators.get(0) instanceof WallCollisionValidator)) {
+            throw new IllegalArgumentException("Il primo validatore deve essere WallCollisionValidator");
+        }
+        this.validators = new ArrayList<>(validators);
+        this.wallValidator = (WallCollisionValidator) validators.get(0);
+    }
+    
+    /**
+     * Verifica se un giocatore può effettuare la mossa (accelerazione),
+     * controllando tutti i validatori configurati.
      */
     public boolean validateMove(Player player, Vector acceleration, GameState gameState) {
         Vector newVelocity = player.getVelocity().add(acceleration);
         Position newPosition = player.getPosition().move(newVelocity);
-        return isPathClear(player.getPosition(), newPosition, gameState.getTrack(), player, gameState);
+        
+        return isMovementValid(player.getPosition(), newPosition, player, gameState);
     }
-
+    
     /**
-     * Controlla se il percorso e' libero da muri e (opzionalmente) da giocatori
-     * fermi.
+     * Verifica se il movimento è valido controllando tutti i validatori.
+     * Il movimento è valido solo se tutti i validatori lo approvano.
      */
-    public boolean isPathClear(Position start, Position end, Track track, Player player, GameState gameState) {
-        if (player.getVelocity().isZero()) {
-            // Se la velocita' era zero, controlliamo solo la destinazione
-            return track.getCell(end.getX(), end.getY()) != CellType.WALL
-                    && !isCellOccupiedByStationaryPlayer(end, gameState, player);
-        }
-
-        int dx = end.getX() - start.getX();
-        int dy = end.getY() - start.getY();
-        int steps = Math.max(Math.abs(dx), Math.abs(dy));
-        if (steps == 0)
-            return true;
-
-        float xIncrement = (float) dx / steps;
-        float yIncrement = (float) dy / steps;
-
-        Set<Position> occupiedCells = getOccupiedPositions(gameState, player);
-
-        float x = start.getX();
-        float y = start.getY();
-
-        for (int i = 0; i <= steps; i++) {
-            int currentX = Math.round(x);
-            int currentY = Math.round(y);
-
-            // salta la cella di partenza
-            if (!(currentX == start.getX() && currentY == start.getY())) {
-                if (track.getCell(currentX, currentY) == CellType.WALL) {
-                    return false;
-                }
-                // Se questa cella e' occupata da un giocatore fermo, no
-                if (occupiedCells.contains(new Position(currentX, currentY))) {
-                    return false;
-                }
-            }
-            x += xIncrement;
-            y += yIncrement;
-        }
-
-        return true;
+    private boolean isMovementValid(Position start, Position end, Player player, GameState gameState) {
+        return validators.stream()
+                .allMatch(validator -> validator.isValidMove(start, end, player, gameState));
     }
-
+    
     /**
-     * Versione "stateless" usata dal PathFinder (A*), che non controlla collisioni
-     * con altri giocatori in movimento,
-     * ma solo i muri.
+     * Versione semplificata per il pathfinding che usa solo il validatore dei muri.
+     * Questo metodo mantiene la compatibilità con il codice esistente.
      */
     public boolean validateMoveTemp(Position start, Vector velocity, Track track) {
         Position end = start.add(velocity);
-
-        int dx = end.getX() - start.getX();
-        int dy = end.getY() - start.getY();
-        int steps = Math.max(Math.abs(dx), Math.abs(dy));
-
-        if (steps == 0) {
-            return true;
-        }
-
-        float xIncrement = (float) dx / steps;
-        float yIncrement = (float) dy / steps;
-        float x = start.getX();
-        float y = start.getY();
-
-        for (int i = 0; i <= steps; i++) {
-            int currentX = Math.round(x);
-            int currentY = Math.round(y);
-
-            if (!(currentX == start.getX() && currentY == start.getY())) {
-                if (track.getCell(currentX, currentY) == CellType.WALL) {
-                    return false;
-                }
-            }
-            x += xIncrement;
-            y += yIncrement;
-        }
-
-        return true;
-    }
-
-    /**
-     * Restituisce le posizioni dei giocatori "fermi" (velocity zero),
-     * da considerare come occupate.
-     */
-    private Set<Position> getOccupiedPositions(GameState gameState, Player currentPlayer) {
-        Set<Position> occupied = new HashSet<>();
-        for (Player other : gameState.getPlayers()) {
-            if (!other.getName().equals(currentPlayer.getName())) {
-                if (other.getVelocity().isZero()) {
-                    occupied.add(other.getPosition());
-                }
-            }
-        }
-        return occupied;
-    }
-
-    /**
-     * Verifica se la cella 'pos' e' occupata da un giocatore fermo (diverso da
-     * 'currentPlayer').
-     */
-    private boolean isCellOccupiedByStationaryPlayer(Position pos, GameState gameState, Player currentPlayer) {
-        for (Player other : gameState.getPlayers()) {
-            if (!other.getName().equals(currentPlayer.getName())) {
-                if (other.getVelocity().isZero() && other.getPosition().equals(pos)) {
-                    return true;
-                }
-            }
-        }
-        return false;
+        return wallValidator.isValidMove(start, end, null, new GameState(track, true));
     }
 }

@@ -16,9 +16,10 @@ public class GameState {
     private int currentPlayerIndex;
     private boolean finished;
     private Player winner;
+    private final boolean isTemporary;
 
     /**
-     * Costruttore.
+     * Costruttore per il gioco normale.
      *
      * @param track   circuito della gara
      * @param players lista di giocatori
@@ -32,6 +33,26 @@ public class GameState {
         this.currentPlayerIndex = 0;
         this.finished = false;
         this.winner = null;
+        this.isTemporary = false;
+    }
+
+    /**
+     * Costruttore per stati temporanei usati nel pathfinding.
+     * Non richiede una lista di giocatori valida.
+     *
+     * @param track circuito della gara
+     * @param temporary deve essere true per indicare che è uno stato temporaneo
+     */
+    public GameState(Track track, boolean temporary) {
+        if (track == null || !temporary) {
+            throw new IllegalArgumentException("Track cannot be null and temporary must be true");
+        }
+        this.track = track;
+        this.players = new ArrayList<>();
+        this.currentPlayerIndex = 0;
+        this.finished = false;
+        this.winner = null;
+        this.isTemporary = true;
     }
 
     public Track getTrack() {
@@ -64,6 +85,15 @@ public class GameState {
 
     public void setWinner(Player winner) {
         this.winner = winner;
+    }
+
+    /**
+     * Verifica se questo è uno stato temporaneo usato per il pathfinding.
+     *
+     * @return true se è uno stato temporaneo, false altrimenti
+     */
+    public boolean isTemporary() {
+        return this.isTemporary;
     }
 
     /**
