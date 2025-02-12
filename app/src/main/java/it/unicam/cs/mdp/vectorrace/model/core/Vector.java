@@ -8,6 +8,7 @@ public class Vector {
 
     private final int dx;
     private final int dy;
+    public static final Vector ZERO = new Vector(0, 0);
 
     /**
      * Costruttore.

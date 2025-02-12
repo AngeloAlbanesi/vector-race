@@ -48,36 +48,33 @@ public class BFSStrategy implements AIStrategy {
 
     @Override
     public Vector getNextAcceleration(Player player, GameState gameState) {
-        Position currentPosition = player.getPosition();
-        Vector currentVelocity = player.getVelocity();
-
-        // Trova il prossimo checkpoint target
-        Position target = targetFinder.findNextTarget(player, gameState);
+        Position target = findTargetPosition(player, gameState);
         if (target == null) {
-            return new Vector(0, 0);
+            return Vector.ZERO;
         }
 
-        // Esegui la ricerca BFS
+        Vector acceleration = calculateAcceleration(player, target, gameState);
+        return processCalculatedAcceleration(player, acceleration, gameState);
+    }
+
+    private Position findTargetPosition(Player player, GameState gameState) {
+        return targetFinder.findNextTarget(player, gameState);
+    }
+
+    private Vector calculateAcceleration(Player player, Position target, GameState gameState) {
         BFSExecutor.SearchResult result = bfsExecutor.search(
-                currentPosition,
-                currentVelocity,
+                player.getPosition(),
+                player.getVelocity(),
                 target,
                 gameState.getTrack());
 
-        // Se non è stato trovato un percorso valido
-        if (!result.isFound()) {
-            return new Vector(0, 0);
-        }
+        return result.isFound() ? result.getNextAcceleration() : Vector.ZERO;
+    }
 
-        Vector chosenAcceleration = result.getNextAcceleration();
-
-        // Valida la mossa finale e aggiorna i checkpoint se necessario
-        if (validateFinalMove(player, chosenAcceleration, currentPosition, gameState)) {
-            return chosenAcceleration;
-        }
-
-        // Fallback: ritorna accelerazione nulla
-        return new Vector(0, 0);
+    private Vector processCalculatedAcceleration(Player player, Vector acceleration, GameState gameState) {
+        return validateFinalMove(player, acceleration, player.getPosition(), gameState)
+                ? acceleration
+                : Vector.ZERO;
     }
 
     /**
