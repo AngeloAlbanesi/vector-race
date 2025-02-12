@@ -8,7 +8,7 @@ public enum CellType {
     ROAD, // Strada, cella percorribile
     START, // Linea di partenza
     FINISH, // Linea di arrivo
-    CHECKPOINT; // Checkpoint (può essere rappresentato da '@' oppure da una cifra)
+    CHECKPOINT; // Checkpoint 
 
     /**
      * Restituisce il CellType corrispondente al carattere. Se il carattere è

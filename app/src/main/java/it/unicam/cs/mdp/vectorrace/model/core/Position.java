@@ -22,11 +22,11 @@ public class Position {
     }
 
     public int getX() {
-        return x;
+        return this.x;
     }
 
     public int getY() {
-        return y;
+        return this.y;
     }
 
     /**
@@ -64,7 +64,7 @@ public class Position {
             return false;
         }
         Position pos = (Position) o;
-        return x == pos.x && y == pos.y;
+        return this.x == pos.getX() && this.y == pos.getY();
     }
 
     @Override
@@ -74,6 +74,6 @@ public class Position {
 
     @Override
     public String toString() {
-        return "(" + x + ", " + y + ")";
+        return "(" + this.x + ", " + this.y + ")";
     }
 }

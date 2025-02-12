@@ -27,21 +27,21 @@ public class Track {
     }
 
     public int getWidth() {
-        return width;
+        return this.width;
     }
 
     public int getHeight() {
-        return height;
+        return this.height;
     }
 
     public boolean isWithinBounds(int x, int y) {
-        return x >= 0 && x < width && y >= 0 && y < height;
+        return x >= 0 && x < this.width && y >= 0 && y < this.height;
     }
 
     public CellType getCell(int x, int y) {
         if (!isWithinBounds(x, y))
             return CellType.WALL;
-        return grid[y][x];
+        return this.grid[y][x];
     }
 
     public boolean isPassable(int x, int y) {
@@ -63,8 +63,8 @@ public class Track {
      */
     public List<Position> getFinishPositions() {
         List<Position> finishPositions = new ArrayList<>();
-        for (int y = 0; y < height; y++) {
-            for (int x = 0; x < width; x++) {
+        for (int y = 0; y < this.height; y++) {
+            for (int x = 0; x < this.width; x++) {
                 if (isFinish(x, y)) {
                     finishPositions.add(new Position(x, y));
                 }
@@ -80,7 +80,7 @@ public class Track {
      * @return numero del checkpoint, o -1 se non è un checkpoint
      */
     public int getCheckpointNumber(Position pos) {
-        PriorityData data = checkpointData.get(pos);
+        PriorityData data = this.checkpointData.get(pos);
         return data != null ? data.getCheckpointNumber() : -1;
     }
 
@@ -91,7 +91,7 @@ public class Track {
      */
     public int getMaxCheckpoint() {
         int max = 0;
-        for (PriorityData data : checkpointData.values()) {
+        for (PriorityData data : this.checkpointData.values()) {
             max = Math.max(max, data.getCheckpointNumber());
         }
         return max;
@@ -107,7 +107,7 @@ public class Track {
      *         sulla riga
      */
     public boolean hasReachedCheckpointInRow(int y, int checkpointNum) {
-        for (Map.Entry<Position, PriorityData> entry : checkpointData.entrySet()) {
+        for (Map.Entry<Position, PriorityData> entry : this.checkpointData.entrySet()) {
             Position pos = entry.getKey();
             PriorityData data = entry.getValue();
             if (pos.getY() == y && data.getCheckpointNumber() == checkpointNum && data.isReached()) {
@@ -123,7 +123,7 @@ public class Track {
      * @param pos posizione del checkpoint
      */
     public void setCheckpointReached(Position pos) {
-        PriorityData data = checkpointData.get(pos);
+        PriorityData data = this.checkpointData.get(pos);
         if (data != null) {
             data.setReached(true);
         }
