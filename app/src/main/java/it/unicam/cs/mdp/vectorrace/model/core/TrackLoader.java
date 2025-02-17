@@ -48,6 +48,32 @@ public class TrackLoader {
         if (lines.isEmpty()) {
             throw new IOException("Il file del circuito è vuoto");
         }
+        
+        int startCount = 0;
+        int finishCount = 0;
+        int checkpointCount = 0;
+        
+        for (String line : lines) {
+            for (char c : line.toCharArray()) {
+                if (c == 'S') {
+                    startCount++;
+                } else if (c == '*') {
+                    finishCount++;
+                } else if (Character.isDigit(c)) {
+                    checkpointCount++;
+                }
+            }
+        }
+        
+        if (startCount < 2) {
+            throw new IOException("Numero insufficiente di posizioni di partenza (minimo 2)");
+        }
+        if (finishCount < 1) {
+            throw new IOException("Deve esserci almeno una posizione di arrivo");
+        }
+        if (checkpointCount < 1) {
+            throw new IOException("Numero insufficiente di checkpoint (minimo 1)");
+        }
     }
 
     /**

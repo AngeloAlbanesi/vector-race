@@ -1,10 +1,5 @@
 package it.unicam.cs.mdp.vectorrace.model.ai.algorithms.astar;
 
-import java.util.Comparator;
-import java.util.HashSet;
-import java.util.PriorityQueue;
-import java.util.Set;
-
 import it.unicam.cs.mdp.vectorrace.model.ai.checkpoint.CheckpointManager;
 import it.unicam.cs.mdp.vectorrace.model.ai.strategies.IPathFinder;
 import it.unicam.cs.mdp.vectorrace.model.core.AccelerationType;
@@ -13,6 +8,10 @@ import it.unicam.cs.mdp.vectorrace.model.core.Vector;
 import it.unicam.cs.mdp.vectorrace.model.game.GameState;
 import it.unicam.cs.mdp.vectorrace.model.game.MovementManager;
 import it.unicam.cs.mdp.vectorrace.model.players.Player;
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.PriorityQueue;
+import java.util.Set;
 
 /**
  * Implementazione dell'algoritmo A* per la ricerca del percorso.
@@ -20,6 +19,7 @@ import it.unicam.cs.mdp.vectorrace.model.players.Player;
  * movimenti. Include una penalità ridotta quando ci si allontana dal target.
  */
 public class AStarPathFinder implements IPathFinder {
+
     private static final int MAX_SPEED = 5;
     private static final int MAX_EXPANSIONS = 200000;
     private static final double PENALTY_FACTOR = 5.0;
@@ -57,10 +57,14 @@ public class AStarPathFinder implements IPathFinder {
         return reconstructPath(goalNode, startNode, player, currentPos, gameState);
     }
 
-    private AStarNode initializeStartNode(Position currentPos, Vector currentVel, Position target) {
+    private AStarNode initializeStartNode(
+            Position currentPos,
+            Vector currentVel,
+            Position target) {
         AStarNode startNode = new AStarNode(currentPos, currentVel, null, null);
         startNode.setGCost(0.0);
-        startNode.setHCost(calculateHeuristic(null, currentPos, currentVel, target));
+        startNode.setHCost(
+                calculateHeuristic(null, currentPos, currentVel, target));
         return startNode;
     }
 
@@ -106,7 +110,10 @@ public class AStarPathFinder implements IPathFinder {
             }
 
             Position newPos = current.getPosition().move(newVel);
-            if (!this.movementManager.validateMoveTemp(current.getPosition(), newVel, gameState.getTrack())) {
+            if (!this.movementManager.validateMoveTemp(
+                    current.getPosition(),
+                    newVel,
+                    gameState.getTrack())) {
                 continue;
             }
 
@@ -121,20 +128,29 @@ public class AStarPathFinder implements IPathFinder {
     }
 
     private boolean isValidVelocity(Vector velocity) {
-        return Math.abs(velocity.getDx()) <= MAX_SPEED &&
-                Math.abs(velocity.getDy()) <= MAX_SPEED;
+        return (Math.abs(velocity.getDx()) <= MAX_SPEED &&
+                Math.abs(velocity.getDy()) <= MAX_SPEED);
     }
 
-    private void updateNeighborCosts(AStarNode current, AStarNode neighbor, double gCost, Position target) {
+    private void updateNeighborCosts(
+            AStarNode current,
+            AStarNode neighbor,
+            double gCost,
+            Position target) {
         neighbor.setGCost(gCost);
-        neighbor.setHCost(calculateHeuristic(
-                current.getPosition(),
-                neighbor.getPosition(),
-                neighbor.getVelocity(),
-                target));
+        neighbor.setHCost(
+                calculateHeuristic(
+                        current.getPosition(),
+                        neighbor.getPosition(),
+                        neighbor.getVelocity(),
+                        target));
     }
 
-    private double calculateHeuristic(Position oldPos, Position newPos, Vector newVel, Position target) {
+    private double calculateHeuristic(
+            Position oldPos,
+            Position newPos,
+            Vector newVel,
+            Position target) {
         double newDist = this.heuristic.calculate(newPos, target);
 
         // Aggiungi penalità se ci si allontana dal target
@@ -146,7 +162,7 @@ public class AStarPathFinder implements IPathFinder {
         }
 
         // Aggiungi fattore velocità per favorire movimenti più fluidi
-        return newDist + 0.5 * (Math.abs(newVel.getDx()) + Math.abs(newVel.getDy()));
+        return (newDist + 0.5 * (Math.abs(newVel.getDx()) + Math.abs(newVel.getDy())));
     }
 
     private Vector reconstructPath(
@@ -164,7 +180,9 @@ public class AStarPathFinder implements IPathFinder {
             cur = cur.getParent();
         }
 
-        Vector chosenAcc = cur.getAppliedAcceleration() != null ? cur.getAppliedAcceleration() : new Vector(0, 0);
+        Vector chosenAcc = cur.getAppliedAcceleration() != null
+                ? cur.getAppliedAcceleration()
+                : new Vector(0, 0);
 
         if (validateAndUpdatePath(player, chosenAcc, currentPos, gameState)) {
             return chosenAcc;
@@ -184,7 +202,11 @@ public class AStarPathFinder implements IPathFinder {
 
         Vector finalVelocity = player.getVelocity().add(acceleration);
         Position finalPos = currentPos.move(finalVelocity);
-        this.checkpointManager.checkCrossedCheckpoints(player, currentPos, finalPos, gameState.getTrack());
+        this.checkpointManager.checkCrossedCheckpoints(
+                player,
+                currentPos,
+                finalPos,
+                gameState.getTrack());
 
         return true;
     }

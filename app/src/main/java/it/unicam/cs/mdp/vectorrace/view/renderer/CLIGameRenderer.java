@@ -16,7 +16,6 @@ public class CLIGameRenderer implements IGameRenderer {
     private static final String START_CELL = "S";
     private static final String FINISH_CELL = "F";
     private static final String EMPTY_CELL = "·";
-    private static final String PLAYER_CELL = "P";
     
     @Override
     public String renderGame(GameState gameState) {

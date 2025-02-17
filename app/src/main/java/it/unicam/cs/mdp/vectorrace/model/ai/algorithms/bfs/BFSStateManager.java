@@ -23,7 +23,7 @@ public class BFSStateManager {
         this.queue = new LinkedList<>();
         this.visited = new HashSet<>();
         this.startNode = new BFSNode(startPosition, startVelocity, null, null);
-        
+
         this.queue.add(startNode);
         this.visited.add(startNode);
     }

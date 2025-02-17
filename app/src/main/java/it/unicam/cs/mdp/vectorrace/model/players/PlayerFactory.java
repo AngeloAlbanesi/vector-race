@@ -1,11 +1,8 @@
 package it.unicam.cs.mdp.vectorrace.model.players;
 
-import java.awt.Color;
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.io.IOException;
 
 import it.unicam.cs.mdp.vectorrace.model.ai.strategies.AIStrategy;
 import it.unicam.cs.mdp.vectorrace.model.ai.strategies.AStar.PureAStarStrategy;
@@ -17,6 +14,7 @@ import it.unicam.cs.mdp.vectorrace.model.core.Position;
  * Implementa il Factory Pattern per incapsulare la logica di creazione.
  */
 public class PlayerFactory {
+    private static final PlayerParser parser = new PlayerParser();
 
     /**
      * Crea una lista di giocatori dal file specificato.
@@ -24,101 +22,81 @@ public class PlayerFactory {
      * @param playerFile     Il percorso del file dei giocatori
      * @param startPositions Le posizioni di partenza disponibili
      * @return Lista dei giocatori creati
-     * @throws IOException           Se si verificano errori durante la lettura del
-     *                               file
-     * @throws IllegalStateException Se non ci sono abbastanza posizioni di partenza
+     * @throws IOException Se si verificano errori durante la lettura del file
+     * @throws PlayerParsingException Se ci sono errori nel parsing dei dati dei giocatori
      */
     public static List<Player> createPlayersFromFile(String playerFile, List<Position> startPositions)
             throws IOException {
+        List<String[]> playerDataList = parser.parsePlayerFile(playerFile);
+        return createPlayersFromData(playerDataList, startPositions);
+    }
+
+    /**
+     * Crea una lista di giocatori dai dati parsati.
+     */
+    private static List<Player> createPlayersFromData(List<String[]> playerDataList, List<Position> startPositions) {
         List<Player> players = new ArrayList<>();
         int startPosIndex = 0;
 
-        try (BufferedReader reader = new BufferedReader(new FileReader(playerFile))) {
-            String line;
-            while ((line = reader.readLine()) != null) {
-                line = line.trim();
-                if (line.isEmpty() || line.startsWith("#")) {
-                    continue;
-                }
-
-                String[] parts = line.split(";");
-                if (parts.length >= 3) {
-                    if (startPosIndex >= startPositions.size()) {
-                        throw new IllegalStateException(
-                                "Non ci sono abbastanza posizioni di partenza per tutti i giocatori");
-                    }
-
-                    Player player = createPlayer(parts, startPositions.get(startPosIndex++));
-                    if (player != null) {
-                        players.add(player);
-                    }
-                } else {
-                    System.err.println("Linea invalida nel file giocatori: " + line);
-                }
-            }
-        }
-
-        if (players.isEmpty()) {
-            throw new IllegalStateException("Nessun giocatore valido trovato nel file " + playerFile);
+        for (String[] rawPlayerData : playerDataList) {
+            checkStartPosition(startPosIndex, startPositions.size());
+            Position startPos = startPositions.get(startPosIndex++);
+            
+            PlayerParser.PlayerData playerData = parser.validatePlayerData(rawPlayerData);
+            Player player = createPlayerFromValidatedData(playerData, startPos);
+            players.add(player);
         }
 
         return players;
     }
 
     /**
-     * Crea un singolo giocatore dai dati forniti.
-     *
-     * @param playerData I dati del giocatore dal file
-     * @param startPos   La posizione di partenza
-     * @return Il giocatore creato o null se i dati non sono validi
+     * Verifica la disponibilità delle posizioni di partenza.
      */
-    private static Player createPlayer(String[] playerData, Position startPos) {
-        try {
-            String tipo = playerData[0].trim().toLowerCase();
-            String name = playerData[1].trim();
-            String colorHex = playerData[2].trim();
-            Color color = Color.decode(colorHex);
-
-            switch (tipo) {
-                case "human":
-                    return createHumanPlayer(name, color, startPos);
-                case "bot":
-                    return createBotPlayer(name, color, startPos, playerData);
-                default:
-                    System.err.println("Tipo giocatore non valido: " + tipo);
-                    return null;
-            }
-        } catch (NumberFormatException e) {
-            System.err.println("Errore nel parsing dei dati per il giocatore: " + e.getMessage());
-            return null;
+    private static void checkStartPosition(int index, int totalPositions) {
+        if (index >= totalPositions) {
+            throw new IllegalStateException(
+                "Non ci sono abbastanza posizioni di partenza per tutti i giocatori");
         }
+    }
+
+    /**
+     * Crea un giocatore dai dati validati.
+     */
+    private static Player createPlayerFromValidatedData(PlayerParser.PlayerData data, Position startPos) {
+        return switch (data.getType()) {
+            case "human" -> createHumanPlayer(data, startPos);
+            case "bot" -> createBotPlayer(data, startPos);
+            default -> throw new PlayerParsingException.InvalidPlayerTypeException(data.getType());
+        };
     }
 
     /**
      * Crea un giocatore umano.
      */
-    private static Player createHumanPlayer(String name, Color color, Position startPos) {
-        return new HumanPlayer(name, color, startPos);
+    private static Player createHumanPlayer(PlayerParser.PlayerData data, Position startPos) {
+        return new HumanPlayer(data.getName(), data.getColor(), startPos);
     }
 
     /**
      * Crea un giocatore bot con la strategia specificata.
      */
-    private static Player createBotPlayer(String name, Color color, Position startPos, String[] playerData) {
-        AIStrategy strategy;
-        if (playerData.length > 3) {
-            switch (Integer.parseInt(playerData[3].trim())) {
-                case 2:
-                    strategy = new PureAStarStrategy();
-                    break;
-                default:
-                    strategy = new BFSStrategy();
-                    break;
-            }
-        } else {
-            System.err.println("Strategia non specificata per il bot " + name + ", uso BFS di default");
-            strategy = new BFSStrategy();
+    private static Player createBotPlayer(PlayerParser.PlayerData data, Position startPos) {
+        AIStrategy strategy = createStrategy(data.getStrategy());
+        return new BotPlayer(data.getName(), data.getColor(), startPos, strategy);
+    }
+
+    /**
+     * Crea la strategia AI appropriata basata sul tipo.
+     */
+    private static AIStrategy createStrategy(StrategyType strategyType) {
+        if (strategyType == null) {
+            return new BFSStrategy();
         }
-        return new BotPlayer(name, color, startPos, strategy);
+        
+        return switch (strategyType) {
+            case ASTAR -> new PureAStarStrategy();
+            case BFS -> new BFSStrategy();
+        };
     }
 }
