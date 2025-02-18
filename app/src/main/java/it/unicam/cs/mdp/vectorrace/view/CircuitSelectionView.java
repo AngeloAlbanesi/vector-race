@@ -8,6 +8,7 @@ import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import it.unicam.cs.mdp.vectorrace.controller.GameController;
 import it.unicam.cs.mdp.vectorrace.model.game.GameState;
+import it.unicam.cs.mdp.vectorrace.config.GUIConfig;
 
 import java.nio.file.Paths;
 
@@ -18,7 +19,7 @@ public class CircuitSelectionView {
 
     public CircuitSelectionView(Stage stage) {
         this.stage = stage;
-        this.playerFile = Paths.get(BASE_PATH, "src/main/resources/players/players.txt").toString();
+        this.playerFile = GUIConfig.PLAYERS_FILE.toString();
     }
 
     public void show() {

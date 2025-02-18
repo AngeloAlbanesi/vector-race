@@ -9,8 +9,9 @@ import java.nio.file.Paths;
  */
 public class CLIConfig {
     public static final Path CIRCUITS_DIR = Paths.get("src/main/resources/circuits");
-    public static final Path PLAYERS_FILE = Paths.get("src/main/resources/players/players.txt");
-    
+    // Updated players file to use playersCLI.txt for CLI mode
+    public static final Path PLAYERS_FILE = Paths.get("src/main/resources/players/playersCLI.txt");
+
     private CLIConfig() {
         // Costruttore privato per evitare istanziazione
     }
