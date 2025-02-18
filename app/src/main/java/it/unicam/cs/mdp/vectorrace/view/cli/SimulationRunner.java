@@ -1,18 +1,18 @@
 package it.unicam.cs.mdp.vectorrace.view.cli;
 
-import it.unicam.cs.mdp.vectorrace.controller.GameController;
+import it.unicam.cs.mdp.vectorrace.controller.IGameController;
 import it.unicam.cs.mdp.vectorrace.view.CLIView;
 
 /**
  * Gestisce l'esecuzione automatica della simulazione del gioco.
  */
 public class SimulationRunner {
-    private final GameController controller;
+    private final IGameController controller;
     private final CLIView view;
     private Thread simulationThread;
     private volatile boolean running;
 
-    public SimulationRunner(GameController controller, CLIView view) {
+    public SimulationRunner(IGameController controller, CLIView view) {
         this.controller = controller;
         this.view = view;
     }

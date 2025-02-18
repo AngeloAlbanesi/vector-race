@@ -1,5 +1,6 @@
 package it.unicam.cs.mdp.vectorrace.view;
 
+import it.unicam.cs.mdp.vectorrace.controller.IGameController;
 import it.unicam.cs.mdp.vectorrace.model.game.GameState;
 import it.unicam.cs.mdp.vectorrace.model.game.MovementManager;
 import it.unicam.cs.mdp.vectorrace.view.gui.*;
@@ -21,8 +22,8 @@ import javafx.util.Duration;
  * Interfaccia grafica principale del gioco.
  * Coordina i vari componenti dell'interfaccia e del gioco.
  */
-public class GUIView extends Application {
-    private static GameState gameState;
+public class GUIView extends Application implements GameView {
+    private IGameController controller;
     private GUIRenderer renderer;
     private GUIInputHandler inputHandler;
     private GUIGameStateManager stateManager;
@@ -35,17 +36,28 @@ public class GUIView extends Application {
     private Button exitButton;
     private Slider speedSlider;
 
-    /**
-     * Imposta lo stato di gioco da visualizzare.
-     */
-    public static void setGameState(GameState state) {
-        gameState = state;
+    public void setController(IGameController controller) {
+        this.controller = controller;
+    }
+
+    @Override
+    public void displayGameState(GameState state) {
+        if (renderer != null) {
+            renderer.render(state, stateManager != null ? stateManager.getValidMoves() : null);
+        }
+    }
+
+    @Override
+    public void displayMessage(String message) {
+        if (statusLabel != null) {
+            Platform.runLater(() -> statusLabel.setText(message));
+        }
     }
 
     @Override
     public void start(Stage primaryStage) {
-        if (gameState == null) {
-            System.err.println("GameState non inizializzato.");
+        if (controller == null) {
+            System.err.println("Controller non inizializzato.");
             Platform.exit();
             return;
         }
@@ -65,7 +77,7 @@ public class GUIView extends Application {
         configureEventHandlers(cellSize);
         setupStage(primaryStage, root);
         // Renderizza solo lo stato iniziale senza avanzare il turno
-        renderer.render(gameState, stateManager.getValidMoves());
+        renderer.render(controller.getGameState(), stateManager.getValidMoves());
     }
 
     /**
@@ -76,7 +88,7 @@ public class GUIView extends Application {
         BorderPane root = componentFactory.createMainLayout();
         
         // Configurazione canvas e renderer
-        canvas = componentFactory.createGameCanvas(gameState.getTrack(), cellSize);
+        canvas = componentFactory.createGameCanvas(controller.getGameState().getTrack(), cellSize);
         root.setCenter(canvas);
         this.renderer = new GUIRenderer(canvas, cellSize);
 
@@ -108,7 +120,7 @@ public class GUIView extends Application {
      */
     private void initializeManagers() {
         this.stateManager = new GUIGameStateManager(
-            gameState,
+            controller.getGameState(),
             new MovementManager(),
             statusLabel::setText
         );
@@ -129,7 +141,7 @@ public class GUIView extends Application {
         );
 
         canvas.setOnMouseClicked(e -> inputHandler.handleGridClick(
-            e.getX(), e.getY(), cellSize, gameState, stateManager.getValidMoves()
+            e.getX(), e.getY(), cellSize, controller.getGameState(), stateManager.getValidMoves()
         ));
     }
 
@@ -148,7 +160,7 @@ public class GUIView extends Application {
         Timeline timeline = new Timeline(new KeyFrame(
             Duration.seconds(1.0 / initialSpeed),
             e -> {
-                if (!inputHandler.isPaused() && !gameState.isFinished()) {
+                if (!inputHandler.isPaused() && !controller.getGameState().isFinished()) {
                     updateGame();
                 }
             }
@@ -162,8 +174,8 @@ public class GUIView extends Application {
         double maxWidth = screen.getVisualBounds().getWidth() * GUIConstants.WINDOW_SCALE_FACTOR;
         double maxHeight = screen.getVisualBounds().getHeight() * GUIConstants.WINDOW_SCALE_FACTOR;
         
-        double widthRatio = maxWidth / gameState.getTrack().getWidth();
-        double heightRatio = maxHeight / gameState.getTrack().getHeight();
+        double widthRatio = maxWidth / controller.getGameState().getTrack().getWidth();
+        double heightRatio = maxHeight / controller.getGameState().getTrack().getHeight();
         
         return (int) Math.min(
             Math.min(widthRatio, heightRatio),
@@ -173,6 +185,6 @@ public class GUIView extends Application {
 
     private void updateGame() {
         stateManager.advanceTurn();
-        renderer.render(gameState, stateManager.getValidMoves());
+        renderer.render(controller.getGameState(), stateManager.getValidMoves());
     }
 }

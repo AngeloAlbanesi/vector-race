@@ -1,6 +1,6 @@
 package it.unicam.cs.mdp.vectorrace.view.cli;
 
-import it.unicam.cs.mdp.vectorrace.controller.GameController;
+import it.unicam.cs.mdp.vectorrace.controller.IGameController;
 import it.unicam.cs.mdp.vectorrace.view.CLIView;
 
 /**
@@ -8,10 +8,10 @@ import it.unicam.cs.mdp.vectorrace.view.CLIView;
  */
 public class CLIMenuManager {
     private final CLIView view;
-    private final GameController controller;
+    private final IGameController controller;
     private final SimulationRunner simulationRunner;
 
-    public CLIMenuManager(CLIView view, GameController controller) {
+    public CLIMenuManager(CLIView view, IGameController controller) {
         this.view = view;
         this.controller = controller;
         this.simulationRunner = new SimulationRunner(controller, view);

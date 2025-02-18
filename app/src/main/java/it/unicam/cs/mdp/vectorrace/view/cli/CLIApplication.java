@@ -1,8 +1,8 @@
 package it.unicam.cs.mdp.vectorrace.view.cli;
 
 import it.unicam.cs.mdp.vectorrace.config.CLIConfig;
-import it.unicam.cs.mdp.vectorrace.controller.GameController;
-import it.unicam.cs.mdp.vectorrace.model.game.GameState;
+import it.unicam.cs.mdp.vectorrace.controller.GameControllerFactory;
+import it.unicam.cs.mdp.vectorrace.controller.IGameController;
 import it.unicam.cs.mdp.vectorrace.view.CLIView;
 
 /**
@@ -11,10 +11,12 @@ import it.unicam.cs.mdp.vectorrace.view.CLIView;
  */
 public class CLIApplication {
     private final CLIView view;
-    private GameController controller;
+    private final GameControllerFactory controllerFactory;
+    private IGameController controller;
 
     public CLIApplication(CLIView view) {
         this.view = view;
+        this.controllerFactory = new GameControllerFactory();
     }
 
     /**
@@ -49,9 +51,8 @@ public class CLIApplication {
     }
 
     private void initializeGame(String circuitPath) throws Exception {
-        GameState gameState = GameController.initializeGame(circuitPath, CLIConfig.PLAYERS_FILE.toString());
-        controller = new GameController(gameState, view);
-        view.displayGameState(gameState);
+        controller = controllerFactory.createController(circuitPath, CLIConfig.PLAYERS_FILE.toString(), view);
+        view.displayGameState(controller.getGameState());
     }
 
     private void runGameLoop() {

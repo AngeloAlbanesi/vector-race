@@ -6,8 +6,8 @@ import javafx.scene.control.Button;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
-import it.unicam.cs.mdp.vectorrace.controller.GameController;
-import it.unicam.cs.mdp.vectorrace.model.game.GameState;
+import it.unicam.cs.mdp.vectorrace.controller.GameControllerFactory;
+import it.unicam.cs.mdp.vectorrace.controller.IGameController;
 import it.unicam.cs.mdp.vectorrace.config.GUIConfig;
 
 import java.nio.file.Paths;
@@ -16,10 +16,12 @@ public class CircuitSelectionView {
     private Stage stage;
     private final String BASE_PATH = "/Users/angeloalbanesi/Università/Programmazione avanzata Loreti/vector-race/app";
     private final String playerFile;
+    private final GameControllerFactory controllerFactory;
 
     public CircuitSelectionView(Stage stage) {
         this.stage = stage;
         this.playerFile = GUIConfig.PLAYERS_FILE.toString();
+        this.controllerFactory = new GameControllerFactory();
     }
 
     public void show() {
@@ -54,9 +56,9 @@ public class CircuitSelectionView {
             System.out.println("Caricamento circuito: " + circuitPath);
             System.out.println("File giocatori: " + this.playerFile);
 
-            GameState gameState = GameController.initializeGame(circuitPath, this.playerFile);
-            GUIView.setGameState(gameState);
             GUIView gameView = new GUIView();
+            IGameController controller = controllerFactory.createController(circuitPath, this.playerFile, gameView);
+            gameView.setController(controller);
             gameView.start(this.stage);
         } catch (Exception e) {
             System.err.println("Errore nel caricamento del circuito: " + e.getMessage());
