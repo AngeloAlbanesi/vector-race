@@ -1,16 +1,24 @@
 package it.unicam.cs.mdp.vectorrace.model.game.validators;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import it.unicam.cs.mdp.vectorrace.model.core.Position;
 import it.unicam.cs.mdp.vectorrace.model.game.GameState;
 import it.unicam.cs.mdp.vectorrace.model.players.Player;
+import it.unicam.cs.mdp.vectorrace.model.ai.algorithms.bresenham.BresenhamPathCalculator;
 
 /**
  * Validatore specifico per le collisioni con altri giocatori.
  */
 public class PlayerCollisionValidator implements MoveValidator {
+    
+    private final BresenhamPathCalculator pathCalculator;
+    
+    public PlayerCollisionValidator() {
+        this.pathCalculator = new BresenhamPathCalculator();
+    }
     
     @Override
     public boolean isValidMove(Position start, Position end, Player player, GameState gameState) {
@@ -25,50 +33,14 @@ public class PlayerCollisionValidator implements MoveValidator {
         }
 
         // Altrimenti controlliamo tutto il percorso
-        Set<Position> occupiedCells = getOccupiedPositions(gameState, player);
+        Set<Position> occupiedPositions = getOccupiedPositions(gameState, player);
+        List<Position> path = pathCalculator.calculatePath(start, end);
         
-        int dx = end.getX() - start.getX();
-        int dy = end.getY() - start.getY();
-        int steps = calculateSteps(dx, dy);
-        
-        if (steps == 0) {
-            return true;
-        }
-        
-        float xIncrement = (float) dx / steps;
-        float yIncrement = (float) dy / steps;
-        
-        return checkPathForPlayers(start, xIncrement, yIncrement, steps, occupiedCells);
-    }
-    
-    /**
-     * Calcola il numero di passi necessari per il movimento
-     */
-    private int calculateSteps(int dx, int dy) {
-        return Math.max(Math.abs(dx), Math.abs(dy));
-    }
-    
-    /**
-     * Controlla se ci sono giocatori fermi lungo il percorso
-     */
-    private boolean checkPathForPlayers(Position start, float xIncrement, float yIncrement, 
-            int steps, Set<Position> occupiedCells) {
-        float x = start.getX();
-        float y = start.getY();
-        
-        for (int i = 0; i <= steps; i++) {
-            int currentX = Math.round(x);
-            int currentY = Math.round(y);
-            
-            // Salta la cella di partenza
-            if (!(currentX == start.getX() && currentY == start.getY())) {
-                if (occupiedCells.contains(new Position(currentX, currentY))) {
-                    return false;
-                }
+        // Skip the starting position in the check
+        for (int i = 1; i < path.size(); i++) {
+            if (occupiedPositions.contains(path.get(i))) {
+                return false;
             }
-            
-            x += xIncrement;
-            y += yIncrement;
         }
         
         return true;
@@ -80,7 +52,7 @@ public class PlayerCollisionValidator implements MoveValidator {
     private Set<Position> getOccupiedPositions(GameState gameState, Player currentPlayer) {
         Set<Position> occupied = new HashSet<>();
         for (Player other : gameState.getPlayers()) {
-            if (!other.getName().equals(currentPlayer.getName()) && other.getVelocity().isZero()) {
+            if (!other.getName().equals(currentPlayer.getName())) {
                 occupied.add(other.getPosition());
             }
         }
@@ -93,7 +65,6 @@ public class PlayerCollisionValidator implements MoveValidator {
     private boolean isCellOccupiedByStationaryPlayer(Position pos, GameState gameState, Player currentPlayer) {
         for (Player other : gameState.getPlayers()) {
             if (!other.getName().equals(currentPlayer.getName()) && 
-                other.getVelocity().isZero() && 
                 other.getPosition().equals(pos)) {
                 return true;
             }
