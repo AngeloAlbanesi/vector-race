@@ -3,23 +3,31 @@ package it.unicam.cs.mdp.vectorrace.model.ai.checkpoint;
 import it.unicam.cs.mdp.vectorrace.model.core.Position;
 
 /**
- * Interfaccia per il tracciamento dei checkpoint attraversati dai giocatori.
+ * Defines the interface for tracking checkpoints passed by players in the Vector Race game.
+ * Implementations of this interface are responsible for storing and retrieving
+ * information about which checkpoints have been reached by each player.
+ *
+ * <p>Key responsibilities:
+ * <ul>
+ *   <li>Recording checkpoint passage for each player</li>
+ *   <li>Checking if a player has passed a specific checkpoint</li>
+ * </ul>
  */
 public interface ICheckpointTracker {
     /**
-     * Verifica se un giocatore ha attraversato un determinato checkpoint.
-     * 
-     * @param playerName nome del giocatore
-     * @param checkpoint posizione del checkpoint
-     * @return true se il checkpoint è stato attraversato
+     * Checks if a player has passed a specific checkpoint.
+     *
+     * @param playerName The name of the player.
+     * @param checkpoint The position of the checkpoint.
+     * @return true if the player has passed the checkpoint, false otherwise.
      */
     boolean hasPassedCheckpoint(String playerName, Position checkpoint);
 
     /**
-     * Registra un checkpoint come attraversato per un giocatore.
-     * 
-     * @param playerName nome del giocatore
-     * @param checkpoint posizione del checkpoint
+     * Marks a checkpoint as passed for a player.
+     *
+     * @param playerName The name of the player.
+     * @param checkpoint The position of the checkpoint.
      */
     void markCheckpointAsPassed(String playerName, Position checkpoint);
 }

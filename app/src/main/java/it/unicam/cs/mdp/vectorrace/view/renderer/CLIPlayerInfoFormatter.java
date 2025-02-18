@@ -4,9 +4,9 @@ import it.unicam.cs.mdp.vectorrace.model.players.Player;
 import java.util.List;
 
 /**
- * Implementazione CLI del formattatore di informazioni dei giocatori.
- * Si occupa esclusivamente della formattazione delle informazioni dei giocatori
- * per la visualizzazione CLI.
+ * CLI implementation of the player information formatter.
+ * It is exclusively responsible for formatting player information
+ * for CLI display.
  */
 public class CLIPlayerInfoFormatter implements IPlayerInfoFormatter {
 

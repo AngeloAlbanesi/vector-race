@@ -13,14 +13,20 @@ import javafx.scene.paint.Color;
 import java.util.Set;
 
 /**
- * Implementazione JavaFX del renderer grafico di gioco.
- * Gestisce il rendering del circuito e dei giocatori su un canvas.
+ * JavaFX implementation of the graphical game renderer.
+ * Manages the rendering of the track and players on a canvas.
  */
 public class GUIRenderer implements IGUIRenderer {
     private final Canvas canvas;
     private final GraphicsContext gc;
     private final int cellSize;
 
+    /**
+     * Constructor for the {@code GUIRenderer} class.
+     *
+     * @param canvas   The canvas to render the game on.
+     * @param cellSize The size of the cells in the game.
+     */
     public GUIRenderer(Canvas canvas, int cellSize) {
         this.canvas = canvas;
         this.gc = canvas.getGraphicsContext2D();
@@ -34,7 +40,10 @@ public class GUIRenderer implements IGUIRenderer {
     }
 
     /**
-     * Disegna il circuito con le celle valide evidenziate.
+     * Draws the track with the valid cells highlighted.
+     *
+     * @param track      The game track.
+     * @param validMoves The set of valid moves for the current player.
      */
     private void drawTrack(Track track, Set<Position> validMoves) {
         for (int y = 0; y < track.getHeight(); y++) {
@@ -45,11 +54,16 @@ public class GUIRenderer implements IGUIRenderer {
     }
 
     /**
-     * Disegna una singola cella del circuito.
+     * Draws a single cell of the track.
+     *
+     * @param x          The x coordinate of the cell.
+     * @param y          The y coordinate of the cell.
+     * @param cellType   The type of the cell.
+     * @param isValidMove Whether the cell is a valid move for the current player.
      */
     private void drawCell(int x, int y, CellType cellType, boolean isValidMove) {
         Color fillColor;
-        
+
         if (isValidMove) {
             fillColor = GUIConstants.VALID_MOVE_COLOR;
         } else {
@@ -69,7 +83,9 @@ public class GUIRenderer implements IGUIRenderer {
     }
 
     /**
-     * Disegna tutti i giocatori sulla mappa.
+     * Draws all players on the map.
+     *
+     * @param players The players to draw.
      */
     private void drawPlayers(Iterable<Player> players) {
         for (Player player : players) {
@@ -78,7 +94,9 @@ public class GUIRenderer implements IGUIRenderer {
     }
 
     /**
-     * Disegna un singolo giocatore.
+     * Draws a single player.
+     *
+     * @param player The player to draw.
      */
     private void drawPlayer(Player player) {
         Position pos = player.getPosition();
@@ -87,7 +105,7 @@ public class GUIRenderer implements IGUIRenderer {
             player.getColor().getGreen(),
             player.getColor().getBlue()
         );
-        
+
         gc.setFill(playerColor);
         gc.fillOval(
             pos.getX() * cellSize + GUIConstants.PLAYER_MARGIN,

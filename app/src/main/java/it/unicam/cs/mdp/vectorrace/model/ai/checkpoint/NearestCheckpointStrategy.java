@@ -6,8 +6,13 @@ import java.util.Set;
 import it.unicam.cs.mdp.vectorrace.model.core.Position;
 
 /**
- * Implementazione dell'interfaccia ICheckpointStrategy che seleziona il checkpoint
- * più vicino alla posizione corrente del giocatore usando la distanza euclidea.
+ * Implements the {@link ICheckpointStrategy} interface to select the checkpoint
+ * nearest to the player's current position. This strategy uses Euclidean
+ * distance to determine the closest checkpoint among the available options.
+ *
+ * <p>The nearest checkpoint is selected based solely on proximity,
+ * without considering other factors such as path obstructions or
+ * strategic advantages.
  */
 public class NearestCheckpointStrategy implements ICheckpointStrategy {
     

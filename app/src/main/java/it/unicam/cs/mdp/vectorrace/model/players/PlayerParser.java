@@ -7,17 +7,39 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import it.unicam.cs.mdp.vectorrace.model.core.Position;
-
 /**
- * Classe responsabile del parsing dei dati dei giocatori da file.
+ * Responsible for parsing and validating player configuration data from files.
+ * This class handles the reading and interpretation of player specifications,
+ * ensuring that all required data is present and valid.
+ *
+ * <p>File format specification:
+ * <ul>
+ *   <li>Each line represents one player</li>
+ *   <li>Fields are separated by semicolons</li>
+ *   <li>Comments start with '#' and are ignored</li>
+ *   <li>Required fields: type;name;colorHex</li>
+ *   <li>Optional fields: strategy (for bot players)</li>
+ * </ul>
+ *
+ * <p>Example valid lines:
+ * <pre>
+ * human;Player1;#FF0000
+ * bot;AIPlayer;#0000FF;1
+ * </pre>
  */
 public class PlayerParser {
     private static final String COMMENT_PREFIX = "#";
     private static final String FIELD_SEPARATOR = ";";
-    
+
     /**
-     * Legge e valida le linee dal file dei giocatori.
+     * Reads and validates player data from a configuration file.
+     * Processes the file line by line, skipping comments and empty lines,
+     * and validates the format of each player specification.
+     *
+     * @param filePath Path to the player configuration file.
+     * @return List of parsed player data arrays.
+     * @throws IOException If file reading fails.
+     * @throws PlayerParsingException If the file contains no valid players.
      */
     public List<String[]> parsePlayerFile(String filePath) throws IOException {
         List<String[]> playerDataList = new ArrayList<>();
@@ -40,7 +62,12 @@ public class PlayerParser {
     }
     
     /**
-     * Analizza una singola linea del file.
+     * Parses a single line from the configuration file.
+     * Handles empty lines, comments, and validates field count.
+     *
+     * @param line The line to parse.
+     * @return Array of player data fields, or null for skipped lines.
+     * @throws PlayerParsingException.InvalidFormatException If line format is invalid.
      */
     private String[] parseLine(String line) {
         line = line.trim();
@@ -57,7 +84,13 @@ public class PlayerParser {
     }
     
     /**
-     * Valida e converte i dati del giocatore.
+     * Validates and converts raw player data into a structured format.
+     * Performs type conversions and validations for all player attributes.
+     *
+     * @param parts Array of raw player data fields.
+     * @return Validated player data object.
+     * @throws PlayerParsingException.InvalidColorException If color format is invalid.
+     * @throws PlayerParsingException.InvalidStrategyException If bot strategy is invalid.
      */
     public PlayerData validatePlayerData(String[] parts) {
         String type = parts[0].trim().toLowerCase();
@@ -82,27 +115,5 @@ public class PlayerParser {
         }
         
         return new PlayerData(type, name, color, strategy);
-    }
-    
-    /**
-     * Classe interna per contenere i dati validati del giocatore.
-     */
-    public static class PlayerData {
-        private final String type;
-        private final String name;
-        private final Color color;
-        private final StrategyType strategy;
-        
-        public PlayerData(String type, String name, Color color, StrategyType strategy) {
-            this.type = type;
-            this.name = name;
-            this.color = color;
-            this.strategy = strategy;
-        }
-        
-        public String getType() { return type; }
-        public String getName() { return name; }
-        public Color getColor() { return color; }
-        public StrategyType getStrategy() { return strategy; }
     }
 }

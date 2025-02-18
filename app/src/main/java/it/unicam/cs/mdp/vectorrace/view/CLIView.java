@@ -8,9 +8,9 @@ import it.unicam.cs.mdp.vectorrace.view.renderer.CLIPlayerInfoFormatter;
 import java.util.Scanner;
 
 /**
- * Implementazione della vista CLI del gioco.
- * Gestisce la visualizzazione dello stato del gioco e l'interazione con l'utente
- * attraverso la console.
+ * The {@code CLIView} class implements the {@code GameView} interface to provide
+ * a command-line interface (CLI) visualization of the Vector Race game.
+ * It manages the output of the game state and user input through the console.
  */
 public class CLIView implements GameView {
     private final Scanner scanner;
@@ -19,6 +19,10 @@ public class CLIView implements GameView {
     private final CLIPlayerInfoFormatter playerInfoFormatter;
     private boolean isGameRunning;
 
+    /**
+     * Constructor for the {@code CLIView} class.
+     * Initializes the objects needed for visualization and user interaction.
+     */
     public CLIView() {
         this.scanner = new Scanner(System.in);
         this.gameRenderer = new CLIGameRenderer();
@@ -27,11 +31,21 @@ public class CLIView implements GameView {
         this.isGameRunning = false;
     }
 
+    /**
+     * Displays a message to the user on the console.
+     *
+     * @param message The message to display.
+     */
     @Override
     public void displayMessage(String message) {
         outputHandler.println(message);
     }
 
+    /**
+     * Displays the current state of the game on the console.
+     *
+     * @param gameState The game state to display.
+     */
     @Override
     public void displayGameState(GameState gameState) {
         outputHandler.clear();
@@ -40,7 +54,8 @@ public class CLIView implements GameView {
     }
 
     /**
-     * Mostra il menu di selezione del circuito.
+     * Shows the circuit selection menu to the user.
+     * Allows the user to choose from the different circuits available for the game.
      */
     public void showCircuitSelection() {
         outputHandler.println("\nSeleziona il circuito:");
@@ -50,7 +65,8 @@ public class CLIView implements GameView {
     }
 
     /**
-     * Mostra il menu principale del gioco.
+     * Shows the main game menu to the user.
+     * Offers options such as starting an automatic simulation, advancing a turn, or exiting the game.
      */
     public void showGameMenu() {
         outputHandler.println("\nMenu di gioco:");
@@ -60,9 +76,9 @@ public class CLIView implements GameView {
     }
 
     /**
-     * Legge una linea di input dalla console.
-     * 
-     * @return La stringa letta o null se si verifica un errore
+     * Reads a line of input from the console.
+     *
+     * @return The string read from the console, or {@code null} if an error occurs.
      */
     public String readLine() {
         try {
@@ -73,18 +89,28 @@ public class CLIView implements GameView {
     }
 
     /**
-     * Mostra un messaggio di errore.
-     * 
-     * @param message Il messaggio di errore da mostrare
+     * Displays an error message to the user on the console.
+     *
+     * @param message The error message to display.
      */
     public void showError(String message) {
         outputHandler.printError(message);
     }
 
+    /**
+     * Returns the execution state of the game.
+     *
+     * @return {@code true} if the game is running, {@code false} otherwise.
+     */
     public boolean isGameRunning() {
         return isGameRunning;
     }
 
+    /**
+     * Sets the execution state of the game.
+     *
+     * @param gameRunning {@code true} if the game is running, {@code false} otherwise.
+     */
     public void setGameRunning(boolean gameRunning) {
         isGameRunning = gameRunning;
     }

@@ -15,8 +15,8 @@ import java.util.Set;
 import java.util.function.Consumer;
 
 /**
- * Gestisce gli input utente e gli eventi UI per il gioco.
- * Segue il Single Responsibility Principle gestendo solo gli input utente.
+ * Manages user inputs and UI events for the game.
+ * Follows the Single Responsibility Principle by handling only user inputs.
  */
 public class GUIInputHandler {
     private final Timeline timeline;
@@ -24,6 +24,13 @@ public class GUIInputHandler {
     private boolean isPaused = true;
     private final Consumer<Void> onUpdate;
 
+    /**
+     * Constructor for the {@code GUIInputHandler} class.
+     *
+     * @param timeline      The timeline for the game loop.
+     * @param statusLabel   The label for displaying the status.
+     * @param onUpdate      The callback to use for updating the game.
+     */
     public GUIInputHandler(Timeline timeline, Label statusLabel, Consumer<Void> onUpdate) {
         this.timeline = timeline;
         this.statusLabel = statusLabel;
@@ -31,7 +38,13 @@ public class GUIInputHandler {
     }
 
     /**
-     * Configura i controlli di gioco (pulsanti e slider).
+     * Configures the game controls (buttons and slider).
+     *
+     * @param startButton The start button.
+     * @param pauseButton The pause button.
+     * @param stepButton  The step button.
+     * @param exitButton  The exit button.
+     * @param speedSlider The speed slider.
      */
     public void setupGameControls(Button startButton, Button pauseButton, Button stepButton, Button exitButton, Slider speedSlider) {
         startButton.setOnAction(e -> handleStartButton());
@@ -70,17 +83,23 @@ public class GUIInputHandler {
         speedSlider.setValue(GUIConstants.DEFAULT_SPEED);
         speedSlider.setShowTickLabels(true);
         speedSlider.setShowTickMarks(true);
-        speedSlider.valueProperty().addListener((obs, oldVal, newVal) -> 
+        speedSlider.valueProperty().addListener((obs, oldVal, newVal) ->
             timeline.setRate(newVal.doubleValue())
         );
     }
 
     /**
-     * Gestisce il click del mouse sulla griglia di gioco.
+     * Handles the mouse click on the game grid.
+     *
+     * @param mouseX      The x coordinate of the mouse click.
+     * @param mouseY      The y coordinate of the mouse click.
+     * @param cellSize    The size of the cells in the game.
+     * @param gameState   The game state.
+     * @param validMoves  The set of valid moves for the current player.
      */
     public void handleGridClick(double mouseX, double mouseY, int cellSize, GameState gameState, Set<Position> validMoves) {
         Player currentPlayer = gameState.getCurrentPlayer();
-        
+
         // Verifica se il gioco è in pausa o se il giocatore non è umano
         if (!isPaused || !(currentPlayer instanceof HumanPlayer)) {
             return;
@@ -110,10 +129,20 @@ public class GUIInputHandler {
         player.setSelectedAcceleration(newVel);
     }
 
+    /**
+     * Returns whether the game is paused.
+     *
+     * @return {@code true} if the game is paused, {@code false} otherwise.
+     */
     public boolean isPaused() {
         return isPaused;
     }
 
+    /**
+     * Updates the status message.
+     *
+     * @param message The message to display.
+     */
     public void updateStatus(String message) {
         statusLabel.setText(message);
     }

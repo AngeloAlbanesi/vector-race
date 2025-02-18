@@ -3,16 +3,16 @@ package it.unicam.cs.mdp.vectorrace.view.renderer;
 import it.unicam.cs.mdp.vectorrace.model.game.GameState;
 
 /**
- * Interfaccia per il rendering del gioco.
- * Definisce i metodi necessari per visualizzare lo stato del gioco.
+ * Interface for the game renderer.
+ * Defines the methods needed to display the state of the game.
  */
 public interface IGameRenderer {
-    
+
     /**
-     * Renderizza lo stato corrente del gioco.
+     * Renders the current state of the game.
      *
-     * @param gameState Lo stato del gioco da renderizzare
-     * @return Una stringa che rappresenta lo stato del gioco
+     * @param gameState The state of the game to render.
+     * @return A string that represents the state of the game.
      */
     String renderGame(GameState gameState);
 }

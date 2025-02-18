@@ -14,9 +14,21 @@ import java.util.PriorityQueue;
 import java.util.Set;
 
 /**
- * Implementazione dell'algoritmo A* per la ricerca del percorso.
- * Utilizza una funzione euristica configurabile e gestisce la validazione dei
- * movimenti. Include una penalità ridotta quando ci si allontana dal target.
+ * Implements the A* search algorithm for pathfinding in the Vector Race game.
+ * This class uses a configurable heuristic function and manages movement
+ * validation to find an optimal path for AI players.
+ *
+ * <p>Key features:
+ * <ul>
+ *   <li>Heuristic-based pathfinding for efficiency</li>
+ *   <li>Move validation to ensure legal movements</li>
+ *   <li>Checkpoint management for tracking progress</li>
+ *   <li>Limited expansion count to prevent infinite loops</li>
+ * </ul>
+ *
+ * <p>The A* algorithm balances exploration and exploitation using the fCost,
+ * which combines the actual cost from the start (gCost) and an estimated cost
+ * to the goal (hCost).
  */
 public class AStarPathFinder implements IPathFinder {
 
@@ -28,6 +40,13 @@ public class AStarPathFinder implements IPathFinder {
     private final MovementManager movementManager;
     private final CheckpointManager checkpointManager;
 
+    /**
+     * Creates a new AStarPathFinder with specified components.
+     *
+     * @param heuristic The heuristic function to estimate the cost to the goal.
+     * @param movementManager The movement manager for validating moves.
+     * @param checkpointManager The checkpoint manager for tracking progress.
+     */
     public AStarPathFinder(
             IHeuristicCalculator heuristic,
             MovementManager movementManager,
@@ -57,6 +76,14 @@ public class AStarPathFinder implements IPathFinder {
         return reconstructPath(goalNode, startNode, player, currentPos, gameState);
     }
 
+    /**
+     * Initializes the starting node for the A* search.
+     *
+     * @param currentPos The player's current position.
+     * @param currentVel The player's current velocity.
+     * @param target The target position.
+     * @return The initialized AStarNode.
+     */
     private AStarNode initializeStartNode(
             Position currentPos,
             Vector currentVel,
@@ -68,6 +95,15 @@ public class AStarPathFinder implements IPathFinder {
         return startNode;
     }
 
+    /**
+     * Finds the goal node using the A* search algorithm.
+     *
+     * @param openSet The priority queue of nodes to evaluate.
+     * @param closedSet The set of nodes already evaluated.
+     * @param target The target position.
+     * @param gameState The current game state.
+     * @return The goal node if found, null otherwise.
+     */
     private AStarNode findGoalNode(
             PriorityQueue<AStarNode> openSet,
             Set<AStarNode> closedSet,
@@ -97,6 +133,15 @@ public class AStarPathFinder implements IPathFinder {
         return null;
     }
 
+    /**
+     * Expands a node by considering all possible acceleration vectors.
+     *
+     * @param current The node to expand.
+     * @param openSet The priority queue of nodes to evaluate.
+     * @param closedSet The set of nodes already evaluated.
+     * @param target The target position.
+     * @param gameState The current game state.
+     */
     private void expandNode(
             AStarNode current,
             PriorityQueue<AStarNode> openSet,
@@ -127,11 +172,25 @@ public class AStarPathFinder implements IPathFinder {
         }
     }
 
+    /**
+     * Checks if a velocity vector is valid (within maximum speed limits).
+     *
+     * @param velocity The velocity vector to check.
+     * @return true if the velocity is valid, false otherwise.
+     */
     private boolean isValidVelocity(Vector velocity) {
         return (Math.abs(velocity.getDx()) <= MAX_SPEED &&
                 Math.abs(velocity.getDy()) <= MAX_SPEED);
     }
 
+    /**
+     * Updates the costs of a neighbor node.
+     *
+     * @param current The current node.
+     * @param neighbor The neighbor node to update.
+     * @param gCost The cost from the start node to the neighbor.
+     * @param target The target position.
+     */
     private void updateNeighborCosts(
             AStarNode current,
             AStarNode neighbor,
@@ -146,6 +205,15 @@ public class AStarPathFinder implements IPathFinder {
                         target));
     }
 
+    /**
+     * Calculates the heuristic estimate from a position to the target.
+     *
+     * @param oldPos The previous position (used for penalty calculation).
+     * @param newPos The new position.
+     * @param newVel The new velocity.
+     * @param target The target position.
+     * @return The heuristic estimate.
+     */
     private double calculateHeuristic(
             Position oldPos,
             Position newPos,
@@ -153,7 +221,7 @@ public class AStarPathFinder implements IPathFinder {
             Position target) {
         double newDist = this.heuristic.calculate(newPos, target);
 
-        // Aggiungi penalità se ci si allontana dal target
+        // Add penalty if moving away from the target
         if (oldPos != null) {
             double oldDist = this.heuristic.calculate(oldPos, target);
             if (newDist > oldDist) {
@@ -161,10 +229,21 @@ public class AStarPathFinder implements IPathFinder {
             }
         }
 
-        // Aggiungi fattore velocità per favorire movimenti più fluidi
+        // Add velocity factor to favor smoother movements
         return (newDist + 0.5 * (Math.abs(newVel.getDx()) + Math.abs(newVel.getDy())));
     }
 
+    /**
+     * Reconstructs the path from the goal node to the start node and returns
+     * the first acceleration vector in the path.
+     *
+     * @param goalNode The goal node.
+     * @param startNode The start node.
+     * @param player The player for whom the path is being found.
+     * @param currentPos The player's current position.
+     * @param gameState The current game state.
+     * @return The first acceleration vector in the path, or a zero vector if no path is found.
+     */
     private Vector reconstructPath(
             AStarNode goalNode,
             AStarNode startNode,
@@ -191,6 +270,15 @@ public class AStarPathFinder implements IPathFinder {
         return new Vector(0, 0);
     }
 
+    /**
+     * Validates the final move and updates checkpoint status.
+     *
+     * @param player The player making the move.
+     * @param acceleration The acceleration vector for the move.
+     * @param currentPos The player's current position.
+     * @param gameState The current game state.
+     * @return true if the move is valid, false otherwise.
+     */
     private boolean validateAndUpdatePath(
             Player player,
             Vector acceleration,

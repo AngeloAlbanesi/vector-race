@@ -4,14 +4,19 @@ import it.unicam.cs.mdp.vectorrace.model.core.Position;
 import it.unicam.cs.mdp.vectorrace.model.core.Track;
 
 /**
- * Interfaccia che definisce le operazioni per localizzare la cella di arrivo nel tracciato.
+ * Defines the operations for locating the finish line cell on the track.
+ * Implementations of this interface are responsible for finding the
+ * position of the finish line, which is the target for players to complete the race.
+ *
+ * <p>The locator provides a method to efficiently search the track and
+ * identify the finish line cell.
  */
 public interface IFinishLocator {
     /**
-     * Cerca e restituisce la posizione della cella di arrivo nel tracciato.
-     * 
-     * @param track Il tracciato in cui cercare la cella di arrivo
-     * @return La posizione della cella di arrivo, o null se non trovata
+     * Locates the finish line cell on the track.
+     *
+     * @param track The track on which to search for the finish line.
+     * @return The position of the finish line cell, or null if not found.
      */
     Position locateFinish(Track track);
 }

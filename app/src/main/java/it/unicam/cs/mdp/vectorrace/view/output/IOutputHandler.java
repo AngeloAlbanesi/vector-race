@@ -1,39 +1,39 @@
 package it.unicam.cs.mdp.vectorrace.view.output;
 
 /**
- * Interfaccia per la gestione dell'output del gioco.
- * Definisce i metodi base per la visualizzazione di messaggi.
+ * Interface for managing the game output.
+ * Defines the basic methods for displaying messages.
  */
 public interface IOutputHandler {
-    
+
     /**
-     * Visualizza una stringa senza andare a capo.
+     * Displays a string without a newline.
      *
-     * @param message Il messaggio da visualizzare
+     * @param message The message to display.
      */
     void print(String message);
 
     /**
-     * Visualizza una stringa andando a capo.
+     * Displays a string with a newline.
      *
-     * @param message Il messaggio da visualizzare
+     * @param message The message to display.
      */
     void println(String message);
 
     /**
-     * Visualizza un messaggio di errore.
+     * Displays an error message.
      *
-     * @param message Il messaggio di errore da visualizzare
+     * @param message The error message to display.
      */
     void printError(String message);
 
     /**
-     * Pulisce lo schermo.
+     * Clears the screen.
      */
     void clear();
-    
+
     /**
-     * Forza il flush del buffer di output.
+     * Forces the flush of the output buffer.
      */
     default void flush() {
         System.out.flush();

@@ -5,8 +5,16 @@ import it.unicam.cs.mdp.vectorrace.model.core.Position;
 import it.unicam.cs.mdp.vectorrace.model.core.Vector;
 
 /**
- * Gestisce lo stato della ricerca BFS, mantenendo la coda dei nodi da visitare,
- * l'insieme dei nodi visitati e il nodo di partenza.
+ * Manages the state of the Breadth-First Search (BFS) algorithm.
+ * This class maintains the queue of nodes to visit, the set of visited nodes,
+ * and the starting node, ensuring efficient and correct execution of the BFS.
+ *
+ * <p>Key responsibilities:
+ * <ul>
+ *   <li>Queue management for node exploration</li>
+ *   <li>Visited node tracking to prevent cycles</li>
+ *   <li>Start node storage for path reconstruction</li>
+ * </ul>
  */
 public class BFSStateManager {
     private final Queue<BFSNode> queue;
@@ -14,10 +22,10 @@ public class BFSStateManager {
     private final BFSNode startNode;
 
     /**
-     * Inizializza un nuovo stato della ricerca BFS.
+     * Initializes a new BFS state.
      *
-     * @param startPosition posizione iniziale
-     * @param startVelocity velocità iniziale
+     * @param startPosition The initial position for the search.
+     * @param startVelocity The initial velocity for the search.
      */
     public BFSStateManager(Position startPosition, Vector startVelocity) {
         this.queue = new LinkedList<>();
@@ -29,24 +37,28 @@ public class BFSStateManager {
     }
 
     /**
-     * @return il prossimo nodo da processare
+     * Gets the next node to process from the queue.
+     *
+     * @return The next node to process, or null if the queue is empty.
      */
     public BFSNode getNextNode() {
         return queue.poll();
     }
 
     /**
-     * @return true se non ci sono più nodi da processare
+     * Checks if there are any more nodes to process.
+     *
+     * @return true if the queue is empty, false otherwise.
      */
     public boolean isQueueEmpty() {
         return queue.isEmpty();
     }
 
     /**
-     * Aggiunge un nuovo nodo alla coda se non è già stato visitato.
+     * Adds a new node to the queue if it hasn't already been visited.
      *
-     * @param node il nodo da aggiungere
-     * @return true se il nodo è stato aggiunto
+     * @param node The node to add.
+     * @return true if the node was added, false if it was already visited.
      */
     public boolean addNode(BFSNode node) {
         if (!visited.contains(node)) {
@@ -58,17 +70,19 @@ public class BFSStateManager {
     }
 
     /**
-     * @return il nodo di partenza
+     * Gets the starting node of the search.
+     *
+     * @return The starting node.
      */
     public BFSNode getStartNode() {
         return startNode;
     }
 
     /**
-     * Verifica se un nodo è già stato visitato.
+     * Checks if a node has already been visited.
      *
-     * @param node il nodo da verificare
-     * @return true se il nodo è già stato visitato
+     * @param node The node to check.
+     * @return true if the node has been visited, false otherwise.
      */
     public boolean isVisited(BFSNode node) {
         return visited.contains(node);

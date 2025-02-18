@@ -1,30 +1,38 @@
 package it.unicam.cs.mdp.vectorrace.view;
 
 /**
- * Interfaccia che definisce i metodi specifici per la CLI.
+ * The {@code CLISpecific} interface defines the specific methods for managing
+ * the command-line interface (CLI) of the Vector Race game.
+ * Classes that implement this interface provide functionalities to
+ * display menus, handle user input, and control the game state
+ * in the CLI environment.
  */
 public interface CLISpecific {
     /**
-     * Mostra il menu di selezione del circuito.
+     * Shows the circuit selection menu to the user.
+     * This menu allows the user to choose from the different circuits available
+     * for the game.
      */
     void showCircuitSelection();
 
     /**
-     * Mostra il menu principale del gioco.
+     * Shows the main game menu.
+     * This menu offers options such as starting a new game, viewing statistics,
+     * or exiting the game.
      */
     void showGameMenu();
 
     /**
-     * Imposta lo stato di esecuzione del gioco.
-     * 
-     * @param running lo stato di esecuzione da impostare
+     * Sets the execution state of the game.
+     *
+     * @param running {@code true} if the game is running, {@code false} otherwise.
      */
     void setGameRunning(boolean running);
 
     /**
-     * Restituisce lo stato di esecuzione del gioco.
-     * 
-     * @return true se il gioco è in esecuzione, false altrimenti
+     * Returns the execution state of the game.
+     *
+     * @return {@code true} if the game is currently running, {@code false} otherwise.
      */
     boolean isGameRunning();
 }

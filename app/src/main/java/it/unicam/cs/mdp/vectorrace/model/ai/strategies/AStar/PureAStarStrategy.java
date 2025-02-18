@@ -13,16 +13,32 @@ import it.unicam.cs.mdp.vectorrace.model.game.MovementManager;
 import it.unicam.cs.mdp.vectorrace.model.players.Player;
 
 /**
- * Implementazione della strategia A* per il movimento del bot.
- * Utilizza un algoritmo A* puro senza penalità e fallback.
+ * Implements the A* search strategy for bot player movement.
+ * This strategy uses a pure A* algorithm without any penalties or fallbacks,
+ * focusing on finding the optimal path based on a heuristic estimate.
+ *
+ * <p>Key components:
+ * <ul>
+ *   <li>{@link AStarPathFinder} - Executes the A* search algorithm</li>
+ *   <li>{@link ChebyshevHeuristic} - Provides heuristic estimates for path cost</li>
+ *   <li>{@link CheckpointTargetFinder} - Determines the next target position</li>
+ * </ul>
+ *
+ * <p>The A* strategy uses a heuristic to guide its search, typically resulting
+ * in more efficient pathfinding compared to uninformed search algorithms like BFS.
  */
 public class PureAStarStrategy implements AIStrategy {
     private final IPathFinder pathFinder;
     private final CheckpointTargetFinder targetFinder;
 
     /**
-     * Costruisce una nuova strategia A*.
-     * Inizializza tutte le dipendenze necessarie con le implementazioni di default.
+     * Creates a new PureAStarStrategy.
+     * Initializes all necessary dependencies with default implementations:
+     * <ul>
+     *   <li>Chebyshev Heuristic for heuristic estimates</li>
+     *   <li>Movement Manager for move validation</li>
+     *   <li>Checkpoint Manager for tracking checkpoints</li>
+     * </ul>
      */
     public PureAStarStrategy() {
         this.targetFinder = new CheckpointTargetFinder();
@@ -32,6 +48,14 @@ public class PureAStarStrategy implements AIStrategy {
                 new CheckpointManager());
     }
 
+    /**
+     * Creates a new PureAStarStrategy with custom path finder and target finder.
+     * This constructor allows for dependency injection, enabling the use of
+     * custom implementations for pathfinding and target selection.
+     *
+     * @param pathFinder The pathfinding algorithm to use.
+     * @param targetFinder The component for finding the next target position.
+     */
     public PureAStarStrategy(IPathFinder pathFinder, CheckpointTargetFinder targetFinder) {
         this.pathFinder = pathFinder;
         this.targetFinder = targetFinder;

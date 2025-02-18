@@ -4,15 +4,20 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 /**
- * Configurazioni per la CLI dell'applicazione.
- * Contiene costanti e path utilizzati dall'interfaccia a riga di comando.
+ * Provides configuration settings for the Command Line Interface (CLI) version of the Vector Race application.
+ * This class holds constants and paths specifically used by the CLI.
  */
 public class CLIConfig {
+    /**
+     * The directory where circuit files are stored.
+     */
     public static final Path CIRCUITS_DIR = Paths.get("src/main/resources/circuits");
-    // Updated players file to use playersCLI.txt for CLI mode
+    /**
+     * The file containing player configurations for the CLI mode.
+     */
     public static final Path PLAYERS_FILE = Paths.get("src/main/resources/players/playersCLI.txt");
 
     private CLIConfig() {
-        // Costruttore privato per evitare istanziazione
+        // Private constructor to prevent instantiation
     }
 }

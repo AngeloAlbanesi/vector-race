@@ -15,8 +15,8 @@ import java.util.Set;
 import java.util.function.Consumer;
 
 /**
- * Gestisce lo stato del gioco e la sua evoluzione.
- * Implementa la logica di avanzamento turni, collisioni e vittoria.
+ * Manages the state of the game and its evolution.
+ * Implements the logic for turn advancement, collisions, and victory.
  */
 public class GUIGameStateManager {
     private final GameState gameState;
@@ -24,6 +24,13 @@ public class GUIGameStateManager {
     private final Consumer<String> statusUpdateCallback;
     private Set<Position> validMoves;
 
+    /**
+     * Constructor for the {@code GUIGameStateManager} class.
+     *
+     * @param gameState            The game state to manage.
+     * @param movementManager      The movement manager to use for validating moves.
+     * @param statusUpdateCallback The callback to use for updating the status.
+     */
     public GUIGameStateManager(GameState gameState, MovementManager movementManager, Consumer<String> statusUpdateCallback) {
         this.gameState = gameState;
         this.movementManager = movementManager;
@@ -33,12 +40,12 @@ public class GUIGameStateManager {
     }
 
     /**
-     * Avanza il gioco di un turno.
+     * Advances the game by one turn.
      */
     public void advanceTurn() {
         Player currentPlayer = gameState.getCurrentPlayer();
         processPlayerTurn(currentPlayer);
-        
+
         if (!gameState.isFinished()) {
             gameState.nextTurn();
             updateValidMoves();
@@ -120,7 +127,7 @@ public class GUIGameStateManager {
     }
 
     /**
-     * Aggiorna l'insieme delle mosse valide per il giocatore corrente.
+     * Updates the set of valid moves for the current player.
      */
     private void updateValidMoves() {
         if (gameState.getCurrentPlayer() instanceof HumanPlayer) {
@@ -131,6 +138,11 @@ public class GUIGameStateManager {
         }
     }
 
+    /**
+     * Gets the set of valid moves for the current player.
+     *
+     * @return The set of valid moves for the current player.
+     */
     public Set<Position> getValidMoves() {
         return validMoves;
     }

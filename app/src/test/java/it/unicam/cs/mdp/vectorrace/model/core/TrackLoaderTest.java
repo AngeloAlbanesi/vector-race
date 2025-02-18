@@ -3,8 +3,6 @@ package it.unicam.cs.mdp.vectorrace.model.core;
 import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.Test;
 
-import it.unicam.cs.mdp.vectorrace.model.ai.checkpoint.PriorityData;
-import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.file.Files;

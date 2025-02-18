@@ -19,8 +19,9 @@ import javafx.stage.Stage;
 import javafx.util.Duration;
 
 /**
- * Interfaccia grafica principale del gioco.
- * Coordina i vari componenti dell'interfaccia e del gioco.
+ * The {@code GUIView} class extends {@code Application} and implements {@code GameView}
+ * to provide the main graphical user interface for the Vector Race game.
+ * It coordinates the various components of the user interface and manages the game loop.
  */
 public class GUIView extends Application implements GameView {
     private IGameController controller;
@@ -36,10 +37,20 @@ public class GUIView extends Application implements GameView {
     private Button exitButton;
     private Slider speedSlider;
 
+    /**
+     * Sets the game controller.
+     *
+     * @param controller The instance of {@code IGameController} to use.
+     */
     public void setController(IGameController controller) {
         this.controller = controller;
     }
 
+    /**
+     * Displays the current state of the game on the graphical interface.
+     *
+     * @param state The game state to display.
+     */
     @Override
     public void displayGameState(GameState state) {
         if (renderer != null) {
@@ -47,6 +58,11 @@ public class GUIView extends Application implements GameView {
         }
     }
 
+    /**
+     * Displays a status message on the graphical interface.
+     *
+     * @param message The message to display.
+     */
     @Override
     public void displayMessage(String message) {
         if (statusLabel != null) {
@@ -54,6 +70,12 @@ public class GUIView extends Application implements GameView {
         }
     }
 
+    /**
+     * The main method for starting the JavaFX application.
+     * Initializes and configures the graphical interface.
+     *
+     * @param primaryStage The main stage of the application.
+     */
     @Override
     public void start(Stage primaryStage) {
         if (controller == null) {
@@ -66,8 +88,10 @@ public class GUIView extends Application implements GameView {
     }
 
     /**
-     * Inizializza tutti i componenti dell'interfaccia grafica.
-     * Questo metodo è stato suddiviso in metodi helper più piccoli per migliorare la manutenibilità.
+     * Initializes all components of the graphical interface.
+     * This method has been divided into smaller helper methods to improve maintainability.
+     *
+     * @param primaryStage The main stage of the application.
      */
     private void initializeComponents(Stage primaryStage) {
         int cellSize = calculateOptimalCellSize();
@@ -81,12 +105,15 @@ public class GUIView extends Application implements GameView {
     }
 
     /**
-     * Crea e configura tutti i componenti dell'interfaccia utente.
+     * Creates and configures all components of the user interface.
+     *
+     * @param cellSize The size of the game cells.
+     * @return The {@code BorderPane} containing all components of the user interface.
      */
     private BorderPane setupUIComponents(int cellSize) {
         GUIComponentFactory componentFactory = new GUIComponentFactory();
         BorderPane root = componentFactory.createMainLayout();
-        
+
         // Configurazione canvas e renderer
         canvas = componentFactory.createGameCanvas(controller.getGameState().getTrack(), cellSize);
         root.setCenter(canvas);
@@ -109,14 +136,16 @@ public class GUIView extends Application implements GameView {
     }
 
     /**
-     * Inizializza il game loop con la velocità di default.
+     * Initializes the game loop with the default speed.
+     *
+     * @param cellSize The size of the game cells.
      */
     private void initializeGameLoop(int cellSize) {
         this.gameLoop = createGameLoop(GUIConstants.DEFAULT_SPEED);
     }
 
     /**
-     * Inizializza i gestori per lo stato del gioco e l'input.
+     * Initializes the handlers for the game state and input.
      */
     private void initializeManagers() {
         this.stateManager = new GUIGameStateManager(
@@ -133,7 +162,9 @@ public class GUIView extends Application implements GameView {
     }
 
     /**
-     * Configura gli handler degli eventi per i controlli UI.
+     * Configures the event handlers for the UI controls.
+     *
+     * @param cellSize The size of the game cells.
      */
     private void configureEventHandlers(int cellSize) {
         inputHandler.setupGameControls(
@@ -146,7 +177,10 @@ public class GUIView extends Application implements GameView {
     }
 
     /**
-     * Configura e mostra la finestra principale del gioco.
+     * Configures and displays the main game window.
+     *
+     * @param primaryStage The main stage of the application.
+     * @param root         The {@code BorderPane} root of the user interface.
      */
     private void setupStage(Stage primaryStage, BorderPane root) {
         Scene scene = new Scene(root);
@@ -173,10 +207,10 @@ public class GUIView extends Application implements GameView {
         Screen screen = Screen.getPrimary();
         double maxWidth = screen.getVisualBounds().getWidth() * GUIConstants.WINDOW_SCALE_FACTOR;
         double maxHeight = screen.getVisualBounds().getHeight() * GUIConstants.WINDOW_SCALE_FACTOR;
-        
+
         double widthRatio = maxWidth / controller.getGameState().getTrack().getWidth();
         double heightRatio = maxHeight / controller.getGameState().getTrack().getHeight();
-        
+
         return (int) Math.min(
             Math.min(widthRatio, heightRatio),
             GUIConstants.MAX_CELL_SIZE

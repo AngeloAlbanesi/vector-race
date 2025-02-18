@@ -5,21 +5,32 @@ import it.unicam.cs.mdp.vectorrace.model.core.Position;
 import it.unicam.cs.mdp.vectorrace.model.core.Track;
 
 /**
- * Interfaccia che definisce le operazioni per la gestione della mappa dei checkpoint.
+ * Defines the operations for managing the checkpoint map in the Vector Race game.
+ * Implementations of this interface are responsible for organizing and
+ * providing access to checkpoint positions on the track.
+ *
+ * <p>Key responsibilities:
+ * <ul>
+ *   <li>Initializing the checkpoint map from the track layout</li>
+ *   <li>Providing access to checkpoints by level or sequence number</li>
+ * </ul>
  */
 public interface ICheckpointMap {
     /**
-     * Inizializza la mappa dei checkpoint per il tracciato specificato.
-     * 
-     * @param track Il tracciato da cui estrarre i checkpoint
+     * Initializes the checkpoint map for the specified track.
+     * This method should scan the track and store all checkpoint positions
+     * for later retrieval.
+     *
+     * @param track The track from which to extract checkpoints.
      */
     void initialize(Track track);
 
     /**
-     * Restituisce l'insieme delle posizioni dei checkpoint per il livello specificato.
-     * 
-     * @param level Il livello del checkpoint
-     * @return Set di posizioni dei checkpoint per quel livello, può essere vuoto
+     * Gets the set of checkpoint positions for the specified level.
+     *
+     * @param level The level or sequence number of the checkpoints to retrieve.
+     * @return A set of checkpoint positions for that level, which may be empty
+     *         if no checkpoints exist at that level.
      */
     Set<Position> getCheckpoints(int level);
 }

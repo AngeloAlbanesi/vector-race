@@ -11,14 +11,25 @@ import it.unicam.cs.mdp.vectorrace.model.core.Position;
 import it.unicam.cs.mdp.vectorrace.model.core.Track;
 
 /**
- * Implementazione dell'interfaccia ICheckpointMap che gestisce la mappa dei
- * checkpoint
- * nel tracciato. Mantiene una mappa di checkpoint organizzati per livello.
+ * Manages the checkpoint map for the Vector Race game.
+ * This class implements the {@link ICheckpointMap} interface and is responsible
+ * for organizing checkpoints on the track by their level or sequence number.
+ *
+ * <p>Key features:
+ * <ul>
+ *   <li>Organizes checkpoints by level for efficient access</li>
+ *   <li>Scans the track to identify and store checkpoint positions</li>
+ *   <li>Provides access to checkpoints at a specific level</li>
+ * </ul>
  */
 public class CheckpointMapManager implements ICheckpointMap {
 
     private final Map<Integer, Set<Position>> checkpointsByLevel;
 
+    /**
+     * Creates a new CheckpointMapManager.
+     * Initializes the map to store checkpoints organized by level.
+     */
     public CheckpointMapManager() {
         this.checkpointsByLevel = new HashMap<>();
     }
@@ -35,8 +46,11 @@ public class CheckpointMapManager implements ICheckpointMap {
     }
 
     /**
-     * Scansiona il tracciato per individuare tutti i checkpoint e organizzarli per
-     * livello.
+     * Scans the track to identify all checkpoint positions and organizes them by level.
+     * This method iterates through each cell on the track and adds checkpoint
+     * positions to the map, using the checkpoint number as the level.
+     *
+     * @param track The track to scan for checkpoints.
      */
     private void scanTrackForCheckpoints(Track track) {
         for (int y = 0; y < track.getHeight(); y++) {
@@ -49,7 +63,11 @@ public class CheckpointMapManager implements ICheckpointMap {
     }
 
     /**
-     * Aggiunge un checkpoint alla mappa, organizzandolo per livello.
+     * Adds a checkpoint to the map, organizing it by level.
+     *
+     * @param track The track containing the checkpoint.
+     * @param x The x-coordinate of the checkpoint.
+     * @param y The y-coordinate of the checkpoint.
      */
     private void addCheckpoint(Track track, int x, int y) {
         Position position = new Position(x, y);

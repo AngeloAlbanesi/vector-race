@@ -4,21 +4,23 @@ import it.unicam.cs.mdp.vectorrace.model.players.Player;
 import java.util.List;
 
 /**
- * Interfaccia per la formattazione delle informazioni dei giocatori.
- * Separa la logica di formattazione delle informazioni dei giocatori dalla visualizzazione.
+ * Interface for formatting player information.
+ * Separates the logic of formatting player information from the visualization.
  */
 public interface IPlayerInfoFormatter {
     /**
-     * Formatta le informazioni di un giocatore.
-     * @param player il giocatore di cui formattare le informazioni
-     * @return stringa formattata con le informazioni del giocatore
+     * Formats the information of a player.
+     *
+     * @param player The player whose information to format.
+     * @return A formatted string with the player's information.
      */
     String formatPlayerInfo(Player player);
 
     /**
-     * Formatta le informazioni di una lista di giocatori.
-     * @param players la lista dei giocatori
-     * @return stringa formattata con le informazioni di tutti i giocatori
+     * Formats the information of a list of players.
+     *
+     * @param players The list of players.
+     * @return A formatted string with the information of all players.
      */
     String formatPlayersInfo(List<Player> players);
 }

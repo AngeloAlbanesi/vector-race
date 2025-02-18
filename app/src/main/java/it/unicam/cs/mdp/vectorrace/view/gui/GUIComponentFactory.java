@@ -11,21 +11,27 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 
 /**
- * Factory per la creazione dei componenti dell'interfaccia grafica.
- * Centralizza la creazione di tutti gli elementi UI per una migliore
- * manutenibilità.
+ * Factory for creating the components of the graphical interface.
+ * Centralizes the creation of all UI elements for better
+ * maintainability.
  */
 public class GUIComponentFactory {
 
     /**
-     * Crea il layout principale dell'applicazione.
+     * Creates the main layout of the application.
+     *
+     * @return The main layout of the application.
      */
     public BorderPane createMainLayout() {
         return new BorderPane();
     }
 
     /**
-     * Crea il canvas per il rendering del gioco.
+     * Creates the canvas for rendering the game.
+     *
+     * @param track    The game track.
+     * @param cellSize The size of the cells in the game.
+     * @return The canvas for rendering the game.
      */
     public Canvas createGameCanvas(Track track, int cellSize) {
         return new Canvas(
@@ -34,7 +40,15 @@ public class GUIComponentFactory {
     }
 
     /**
-     * Crea il pannello dei controlli di gioco.
+     * Creates the control panel for the game.
+     *
+     * @param startButton The start button.
+     * @param pauseButton The pause button.
+     * @param stepButton  The step button.
+     * @param exitButton  The exit button.
+     * @param speedSlider The speed slider.
+     * @param statusLabel The status label.
+     * @return The control panel for the game.
      */
     public VBox createControlPanel(Button startButton, Button pauseButton,
             Button stepButton, Button exitButton,
@@ -50,7 +64,13 @@ public class GUIComponentFactory {
     }
 
     /**
-     * Crea il pannello dei pulsanti di controllo.
+     * Creates the button panel for the controls.
+     *
+     * @param startButton The start button.
+     * @param pauseButton The pause button.
+     * @param stepButton  The step button.
+     * @param exitButton  The exit button.
+     * @return The button panel for the controls.
      */
     public HBox createButtonPanel(Button startButton, Button pauseButton,
             Button stepButton, Button exitButton) {
@@ -59,7 +79,10 @@ public class GUIComponentFactory {
     }
 
     /**
-     * Crea il controllo della velocità.
+     * Creates the speed control.
+     *
+     * @param speedSlider The speed slider.
+     * @return The speed control.
      */
     public HBox createSpeedControl(Slider speedSlider) {
         Label speedLabel = new Label("Velocità:");
@@ -67,35 +90,45 @@ public class GUIComponentFactory {
     }
 
     /**
-     * Crea il pulsante di avvio.
+     * Creates the start button.
+     *
+     * @return The start button.
      */
     public Button createStartButton() {
         return new Button("Avvia");
     }
 
     /**
-     * Crea il pulsante di pausa.
+     * Creates the pause button.
+     *
+     * @return The pause button.
      */
     public Button createPauseButton() {
         return new Button("Pausa");
     }
 
     /**
-     * Crea il pulsante per l'avanzamento di un turno.
+     * Creates the step button.
+     *
+     * @return The step button.
      */
     public Button createStepButton() {
         return new Button("Passo");
     }
 
     /**
-     * Crea il pulsante di uscita.
+     * Creates the exit button.
+     *
+     * @return The exit button.
      */
     public Button createExitButton() {
         return new Button("Termina gara");
     }
 
     /**
-     * Crea lo slider per il controllo della velocità.
+     * Creates the slider for the speed control.
+     *
+     * @return The slider for the speed control.
      */
     public Slider createSpeedSlider() {
         Slider slider = new Slider(
@@ -108,7 +141,9 @@ public class GUIComponentFactory {
     }
 
     /**
-     * Crea l'etichetta per lo stato del gioco.
+     * Creates the label for the game state.
+     *
+     * @return The label for the game state.
      */
     public Label createStatusLabel() {
         return new Label("Pronto");

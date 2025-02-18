@@ -4,21 +4,30 @@ import it.unicam.cs.mdp.vectorrace.config.CLIConfig;
 import it.unicam.cs.mdp.vectorrace.view.CLIView;
 
 /**
- * Gestisce la selezione del circuito di gioco tramite interfaccia CLI.
- * Permette all'utente di scegliere tra i circuiti disponibili.
+ * The {@code CircuitSelector} class manages the selection of the game circuit
+ * through the command-line interface (CLI).
+ * It allows the user to choose from the available circuits, validating the input
+ * and providing appropriate feedback in case of errors.
  */
 public class CircuitSelector {
     private final CLIView view;
 
+    /**
+     * Constructor for the {@code CircuitSelector} class.
+     *
+     * @param view The instance of {@code CLIView} used to interact with the user.
+     */
     public CircuitSelector(CLIView view) {
         this.view = view;
     }
 
     /**
-     * Gestisce la selezione del circuito in base all'input dell'utente.
-     * 
-     * @param input L'input dell'utente (numero del circuito)
-     * @return Il path del circuito selezionato o null se la selezione non è valida
+     * Handles the selection of the circuit based on the input provided by the user.
+     * Converts the input to an integer and returns the path of the corresponding circuit.
+     * In case of invalid input, displays an error message and returns {@code null}.
+     *
+     * @param input The user input, which represents the number of the desired circuit.
+     * @return The path of the selected circuit, or {@code null} if the selection is invalid.
      */
     public String handleCircuitSelection(String input) {
         try {

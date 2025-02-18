@@ -5,8 +5,12 @@ import it.unicam.cs.mdp.vectorrace.model.core.Position;
 import it.unicam.cs.mdp.vectorrace.model.core.Track;
 
 /**
- * Implementazione dell'interfaccia IFinishLocator che si occupa di
- * localizzare la cella di arrivo nel tracciato.
+ * Default implementation of the {@link IFinishLocator} interface.
+ * This class is responsible for locating the finish line cell on the track
+ * for the Vector Race game.
+ *
+ * <p>The locator scans the entire track grid to find a cell marked as
+ * the finish line ({@link CellType#FINISH}).
  */
 public class FinishCellLocator implements IFinishLocator {
     

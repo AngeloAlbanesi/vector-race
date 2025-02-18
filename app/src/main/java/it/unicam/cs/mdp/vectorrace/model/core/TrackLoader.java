@@ -11,17 +11,41 @@ import java.util.Map;
 import it.unicam.cs.mdp.vectorrace.model.ai.checkpoint.PriorityData;
 
 /**
- * Classe responsabile del caricamento e parsing dei file del circuito.
- * Implementa il Single Responsibility Principle gestendo solo la logica di caricamento tracciato.
+ * Responsible for loading and parsing track files in the Vector Race game.
+ * This class implements the Single Responsibility Principle by focusing solely on track loading logic.
+ * 
+ * <p>Track files are text-based and follow these conventions:
+ * <ul>
+ *   <li>'#' - Wall cells that cannot be traversed</li>
+ *   <li>'.' - Road cells that can be traversed</li>
+ *   <li>'S' - Start positions (minimum 2 required)</li>
+ *   <li>'*' - Finish line cells (minimum 1 required)</li>
+ *   <li>Digits - Checkpoint cells with their sequence number</li>
+ * </ul>
+ * 
+ * <p>The loader performs several validations:
+ * <ul>
+ *   <li>Ensures minimum number of start positions (2)</li>
+ *   <li>Verifies presence of finish line</li>
+ *   <li>Checks for minimum number of checkpoints (1)</li>
+ *   <li>Validates file format and content</li>
+ * </ul>
  */
 public class TrackLoader {
     
     /**
-     * Carica un circuito da file.
+     * Loads a track from a file.
+     * This method orchestrates the complete loading process including:
+     * <ul>
+     *   <li>Reading the file content</li>
+     *   <li>Validating track requirements</li>
+     *   <li>Creating the grid structure</li>
+     *   <li>Processing checkpoint data</li>
+     * </ul>
      * 
-     * @param path Il percorso del file del circuito
-     * @return Il circuito caricato
-     * @throws IOException Se si verificano errori durante la lettura del file
+     * @param path The path to the track file.
+     * @return A fully initialized {@link Track} instance.
+     * @throws IOException If file reading fails or track validation fails.
      */
     public static Track loadTrack(String path) throws IOException {
         List<String> lines = readLines(path);
@@ -39,10 +63,17 @@ public class TrackLoader {
     }
 
     /**
-     * Valida il file del circuito.
+     * Validates the track file content against game requirements.
+     * Performs essential checks to ensure the track is playable:
+     * <ul>
+     *   <li>Verifies file is not empty</li>
+     *   <li>Counts and validates start positions (minimum 2)</li>
+     *   <li>Verifies finish line presence (minimum 1 cell)</li>
+     *   <li>Validates checkpoint presence (minimum 1)</li>
+     * </ul>
      *
-     * @param lines Le linee del file
-     * @throws IOException Se il file non è valido
+     * @param lines The lines read from the track file.
+     * @throws IOException If any validation check fails.
      */
     private static void validateTrackFile(List<String> lines) throws IOException {
         if (lines.isEmpty()) {
@@ -77,22 +108,25 @@ public class TrackLoader {
     }
 
     /**
-     * Crea una griglia vuota con le dimensioni specificate.
+     * Creates an empty grid with the specified dimensions.
+     * Initializes a 2D array that will hold the track layout.
      *
-     * @param height Altezza della griglia
-     * @param width Larghezza della griglia
-     * @return La griglia creata
+     * @param height The number of rows in the grid.
+     * @param width The number of columns in the grid.
+     * @return An empty 2D array of {@link CellType}.
      */
     private static CellType[][] createEmptyGrid(int height, int width) {
         return new CellType[height][width];
     }
 
     /**
-     * Popola la griglia e i dati dei checkpoint.
+     * Populates the grid and checkpoint data from the file content.
+     * Processes each character in the file to build the track layout
+     * and initialize checkpoint information.
      *
-     * @param grid La griglia da popolare
-     * @param checkpointData I dati dei checkpoint
-     * @param lines Le linee del file
+     * @param grid The grid to populate with cell types.
+     * @param checkpointData Map to populate with checkpoint information.
+     * @param lines The lines read from the track file.
      */
     private static void populateGridAndCheckpoints(CellType[][] grid, Map<Position, PriorityData> checkpointData, List<String> lines) {
         for (int y = 0; y < grid.length; y++) {
@@ -104,13 +138,15 @@ public class TrackLoader {
     }
 
     /**
-     * Processa un carattere della griglia e aggiorna la cella corrispondente.
+     * Processes a single character from the track file.
+     * Converts the character into appropriate cell type and handles
+     * checkpoint-specific processing if needed.
      *
-     * @param grid La griglia
-     * @param checkpointData I dati dei checkpoint
-     * @param c Il carattere da processare
-     * @param x La coordinata x
-     * @param y La coordinata y
+     * @param grid The grid being populated.
+     * @param checkpointData Map of checkpoint data being populated.
+     * @param c The character to process.
+     * @param x The x-coordinate in the grid.
+     * @param y The y-coordinate in the grid.
      */
     private static void processCellCharacter(CellType[][] grid, Map<Position, PriorityData> checkpointData,
             char c, int x, int y) {
@@ -122,13 +158,15 @@ public class TrackLoader {
     }
 
     /**
-     * Processa un checkpoint e aggiorna la griglia e i dati dei checkpoint.
+     * Processes a checkpoint cell.
+     * Sets up both the grid cell type and the associated checkpoint data
+     * including priority level calculation.
      *
-     * @param grid La griglia
-     * @param checkpointData I dati dei checkpoint
-     * @param c Il carattere del checkpoint
-     * @param x La coordinata x
-     * @param y La coordinata y
+     * @param grid The grid being populated.
+     * @param checkpointData Map of checkpoint data being populated.
+     * @param c The checkpoint number character.
+     * @param x The x-coordinate in the grid.
+     * @param y The y-coordinate in the grid.
      */
     private static void processCheckpoint(CellType[][] grid, Map<Position, PriorityData> checkpointData,
             char c, int x, int y) {
@@ -140,11 +178,12 @@ public class TrackLoader {
     }
 
     /**
-     * Legge le linee del file.
-     * 
-     * @param path Il percorso del file
-     * @return Lista delle linee lette
-     * @throws IOException Se si verificano errori durante la lettura
+     * Reads all non-empty lines from the track file.
+     * Handles file access and basic content reading.
+     *
+     * @param path The path to the track file.
+     * @return List of non-empty lines from the file.
+     * @throws IOException If file reading fails.
      */
     private static List<String> readLines(String path) throws IOException {
         List<String> lines = new ArrayList<>();
@@ -158,18 +197,24 @@ public class TrackLoader {
     }
 
     /**
-     * Calcola il livello di priorità di un checkpoint.
-     * 
-     * @param checkpointNumber Il numero del checkpoint
-     * @return Il livello di priorità calcolato
+     * Calculates the priority level for a checkpoint based on its number.
+     * Priority levels are assigned as follows:
+     * <ul>
+     *   <li>1-3: Low priority (level 1)</li>
+     *   <li>4-6: Medium priority (level 2)</li>
+     *   <li>7+: High priority (level 3)</li>
+     * </ul>
+     *
+     * @param checkpointNumber The checkpoint's sequence number.
+     * @return The calculated priority level (1-3).
      */
     private static int calculatePriorityLevel(int checkpointNumber) {
         if (checkpointNumber <= 3) {
-            return 1; // Priorità bassa
+            return 1; // Low priority
         } else if (checkpointNumber <= 6) {
-            return 2; // Priorità media
+            return 2; // Medium priority
         } else {
-            return 3; // Priorità alta
+            return 3; // High priority
         }
     }
 }

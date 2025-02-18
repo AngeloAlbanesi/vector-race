@@ -1,4 +1,3 @@
-// HumanPlayer.java
 package it.unicam.cs.mdp.vectorrace.model.players;
 
 import java.awt.Color;
@@ -11,8 +10,24 @@ import it.unicam.cs.mdp.vectorrace.model.game.GameState;
 import it.unicam.cs.mdp.vectorrace.model.game.MovementManager;
 
 /**
- * Rappresenta un giocatore controllato da un utente umano. L'input viene
- * fornito tramite interfaccia GUI JavaFX.
+ * Represents a human-controlled player in the Vector Race game.
+ * This class manages user input through the JavaFX GUI interface and handles
+ * movement validation and visualization of available moves.
+ *
+ * <p>Key features:
+ * <ul>
+ *   <li>Interactive move selection through GUI</li>
+ *   <li>Real-time move validation</li>
+ *   <li>Visual feedback for valid moves</li>
+ *   <li>Movement state management</li>
+ * </ul>
+ *
+ * <p>The class maintains:
+ * <ul>
+ *   <li>Currently selected acceleration</li>
+ *   <li>Set of valid moves for the current turn</li>
+ *   <li>Visual highlighting for available moves</li>
+ * </ul>
  */
 public class HumanPlayer extends Player {
     private final MovementManager movementManager;
@@ -21,11 +36,12 @@ public class HumanPlayer extends Player {
     private static final Color HIGHLIGHT_COLOR = Color.decode("#90EE90");
 
     /**
-     * Costruttore.
+     * Creates a new human player with specified attributes.
+     * Initializes movement management and validation components.
      *
-     * @param name          nome del giocatore
-     * @param color         colore per visualizzazione
-     * @param startPosition posizione iniziale
+     * @param name The player's identifier name.
+     * @param color The player's display color.
+     * @param startPosition The player's initial position on the track.
      */
     public HumanPlayer(String name, Color color, Position startPosition) {
         super(name, color, startPosition);
@@ -35,14 +51,21 @@ public class HumanPlayer extends Player {
     }
 
     /**
-     * Calcola tutte le mosse valide disponibili per il giocatore.
+     * Calculates all valid moves available to the player.
+     * This method:
+     * <ol>
+     *   <li>Clears previous valid moves</li>
+     *   <li>Checks all possible acceleration vectors (-1,0,1 for both x and y)</li>
+     *   <li>Validates each potential move using the movement manager</li>
+     *   <li>Stores valid destination positions</li>
+     * </ol>
      * 
-     * @param gameState stato corrente del gioco
-     * @return Set di posizioni valide
+     * @param gameState The current state of the game.
+     * @return Set of all valid positions the player can move to.
      */
     public Set<Position> calculateValidMoves(GameState gameState) {
         this.validMoves.clear();
-        // Controllo delle 8 direzioni possibili (-1,0,1 per x e y)
+        // Check all 8 possible directions (-1,0,1 for x and y)
         for (int dx = -1; dx <= 1; dx++) {
             for (int dy = -1; dy <= 1; dy++) {
                 Vector acceleration = new Vector(dx, dy);
@@ -58,21 +81,31 @@ public class HumanPlayer extends Player {
     }
 
     /**
-     * Verifica se una posizione è una mossa valida.
+     * Checks if a given position represents a valid move.
+     * Used by the GUI to determine which cells should be highlighted.
+     *
+     * @param position The position to check.
+     * @return true if the position is a valid move destination.
      */
     public boolean isValidMove(Position position) {
         return this.validMoves.contains(position);
     }
 
     /**
-     * Imposta l'accelerazione selezionata dall'utente.
+     * Sets the acceleration vector selected by the user through the GUI.
+     * This method is called when the user clicks on a valid destination cell.
+     *
+     * @param acceleration The selected acceleration vector.
      */
     public void setSelectedAcceleration(Vector acceleration) {
         this.selectedAcceleration = acceleration;
     }
 
     /**
-     * Restituisce il colore di evidenziazione per le mosse valide.
+     * Gets the color used to highlight valid moves in the GUI.
+     * This color provides visual feedback for available move options.
+     *
+     * @return The highlight color for valid moves.
      */
     public Color getHighlightColor() {
         return HIGHLIGHT_COLOR;
@@ -84,7 +117,13 @@ public class HumanPlayer extends Player {
     }
 
     /**
-     * Resetta la selezione dell'accelerazione.
+     * Resets the player's movement selection state.
+     * This method:
+     * <ul>
+     *   <li>Clears the selected acceleration</li>
+     *   <li>Clears the set of valid moves</li>
+     * </ul>
+     * Called at the end of each turn or when the user cancels a move.
      */
     public void resetSelection() {
         this.selectedAcceleration = null;

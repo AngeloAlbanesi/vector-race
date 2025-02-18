@@ -12,18 +12,31 @@ import it.unicam.cs.mdp.vectorrace.config.GUIConfig;
 
 import java.nio.file.Paths;
 
+/**
+ * The {@code CircuitSelectionView} class represents the view for selecting the game circuit.
+ * It allows the user to choose from different available circuits through a graphical interface.
+ */
 public class CircuitSelectionView {
     private Stage stage;
     private final String BASE_PATH = "/Users/angeloalbanesi/Università/Programmazione avanzata Loreti/vector-race/app";
     private final String playerFile;
     private final GameControllerFactory controllerFactory;
 
+    /**
+     * Constructor for the {@code CircuitSelectionView} class.
+     *
+     * @param stage The JavaFX stage on which the view will be displayed.
+     */
     public CircuitSelectionView(Stage stage) {
         this.stage = stage;
         this.playerFile = GUIConfig.PLAYERS_FILE.toString();
         this.controllerFactory = new GameControllerFactory();
     }
 
+    /**
+     * Shows the view for circuit selection.
+     * Creates a layout with buttons for each available circuit.
+     */
     public void show() {
         VBox root = new VBox(20);
         root.setAlignment(Pos.CENTER);
@@ -51,6 +64,11 @@ public class CircuitSelectionView {
         this.stage.show();
     }
 
+    /**
+     * Loads the specified circuit and starts the game view.
+     *
+     * @param circuitPath The path of the circuit file to load.
+     */
     private void loadCircuit(String circuitPath) {
         try {
             System.out.println("Caricamento circuito: " + circuitPath);

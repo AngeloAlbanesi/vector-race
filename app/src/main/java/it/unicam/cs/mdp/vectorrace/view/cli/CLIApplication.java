@@ -6,23 +6,28 @@ import it.unicam.cs.mdp.vectorrace.controller.IGameController;
 import it.unicam.cs.mdp.vectorrace.view.CLIView;
 
 /**
- * Gestisce l'avvio e l'esecuzione dell'applicazione in modalità CLI.
- * Coordina l'interazione tra view, controller e gestione degli input utente.
+ * Manages the startup and execution of the application in CLI mode.
+ * Coordinates the interaction between view, controller, and user input management.
  */
 public class CLIApplication {
     private final CLIView view;
     private final GameControllerFactory controllerFactory;
     private IGameController controller;
 
+    /**
+     * Constructor for the {@code CLIApplication} class.
+     *
+     * @param view The CLI view to use for interacting with the user.
+     */
     public CLIApplication(CLIView view) {
         this.view = view;
         this.controllerFactory = new GameControllerFactory();
     }
 
     /**
-     * Avvia l'applicazione in modalità CLI.
-     * Gestisce la selezione del circuito, l'inizializzazione del gioco
-     * e l'esecuzione del menu principale.
+     * Starts the application in CLI mode.
+     * Manages the selection of the circuit, the initialization of the game,
+     * and the execution of the main menu.
      */
     public void start() {
         try {
@@ -39,14 +44,14 @@ public class CLIApplication {
     private String selectCircuit() {
         String circuitPath = null;
         CircuitSelector selector = new CircuitSelector(view);
-        
+
         while (circuitPath == null) {
             view.showCircuitSelection();
             String input = readInput();
             if (input == null) break;
             circuitPath = selector.handleCircuitSelection(input);
         }
-        
+
         return circuitPath;
     }
 

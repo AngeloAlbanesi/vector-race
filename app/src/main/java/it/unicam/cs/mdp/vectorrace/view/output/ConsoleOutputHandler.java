@@ -1,11 +1,11 @@
 package it.unicam.cs.mdp.vectorrace.view.output;
 
 /**
- * Gestore dell'output su console.
- * Fornisce metodi per la visualizzazione di messaggi sulla console.
+ * Handler for console output.
+ * Provides methods for displaying messages on the console.
  */
 public class ConsoleOutputHandler implements IOutputHandler {
-    
+
     @Override
     public void println(String message) {
         System.out.println(message);
@@ -22,13 +22,13 @@ public class ConsoleOutputHandler implements IOutputHandler {
     }
 
     /**
-     * Pulisce lo schermo della console (supporto limitato).
+     * Clears the console screen (limited support).
      */
     public void clear() {
         // Tentativo di pulire la console in sistemi Unix-like
         System.out.print("\033[H\033[2J");
         System.out.flush();
-        
+
         // In caso di Windows o se il metodo precedente non funziona
         // stampa alcune righe vuote
         for(int i = 0; i < 50; i++) {

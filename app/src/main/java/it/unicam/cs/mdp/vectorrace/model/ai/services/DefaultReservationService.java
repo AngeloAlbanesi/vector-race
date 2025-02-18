@@ -5,12 +5,24 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Implementazione predefinita dell'interfaccia IReservationService.
- * Gestisce le prenotazioni dei checkpoint per i giocatori.
+ * Default implementation of the {@link IReservationService} interface.
+ * This class manages checkpoint reservations for players in the Vector Race game,
+ * preventing multiple players from targeting the same checkpoint simultaneously.
+ *
+ * <p>Key responsibilities:
+ * <ul>
+ *   <li>Reserving checkpoints for players</li>
+ *   <li>Checking if a checkpoint is already reserved</li>
+ *   <li>Removing reservations when a player passes a checkpoint</li>
+ * </ul>
  */
 public class DefaultReservationService implements IReservationService {
     private final Map<Position, String> checkpointReservations;
 
+    /**
+     * Creates a new DefaultReservationService.
+     * Initializes the data structures used to store checkpoint reservations.
+     */
     public DefaultReservationService() {
         this.checkpointReservations = new HashMap<>();
     }

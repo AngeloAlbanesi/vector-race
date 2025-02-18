@@ -5,20 +5,22 @@ import java.util.List;
 import it.unicam.cs.mdp.vectorrace.model.core.Position;
 
 /**
- * Classe che implementa l'algoritmo di Bresenham per il calcolo del percorso
- * tra due punti.
- * Questa implementazione è ottimizzata per il tracciamento dei checkpoint nel
- * gioco.
+ * Implements Bresenham's line algorithm for calculating the path between two points.
+ * This implementation is optimized for checkpoint tracking in the Vector Race game,
+ * ensuring that all cells intersected by the line are included in the path.
+ *
+ * <p>The algorithm uses a supercover approach to include all cells that the
+ * line passes through, which is crucial for accurate collision detection and
+ * checkpoint validation.
  */
 public class BresenhamPathCalculator {
 
     /**
-     * Calcola tutti i punti del percorso tra due posizioni usando l'algoritmo di
-     * Bresenham.
-     * 
-     * @param start posizione di partenza
-     * @param end   posizione di arrivo
-     * @return lista di tutte le posizioni nel percorso, inclusi start e end
+     * Calculates all positions on the path between two points using Bresenham's algorithm.
+     *
+     * @param start The starting position.
+     * @param end The ending position.
+     * @return A list of all positions on the path, including the start and end positions.
      */
     public List<Position> calculatePath(Position start, Position end) {
         List<Position> path = new ArrayList<>();

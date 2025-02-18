@@ -4,7 +4,7 @@ import it.unicam.cs.mdp.vectorrace.controller.IGameController;
 import it.unicam.cs.mdp.vectorrace.view.CLIView;
 
 /**
- * Gestisce l'esecuzione automatica della simulazione del gioco.
+ * Manages the automatic execution of the game simulation.
  */
 public class SimulationRunner {
     private final IGameController controller;
@@ -12,13 +12,19 @@ public class SimulationRunner {
     private Thread simulationThread;
     private volatile boolean running;
 
+    /**
+     * Constructor for the {@code SimulationRunner} class.
+     *
+     * @param controller The game controller to use for running the simulation.
+     * @param view       The CLI view to use for displaying the game state.
+     */
     public SimulationRunner(IGameController controller, CLIView view) {
         this.controller = controller;
         this.view = view;
     }
 
     /**
-     * Avvia la simulazione automatica del gioco.
+     * Starts the automatic simulation of the game.
      */
     public void start() {
         running = true;
@@ -34,7 +40,7 @@ public class SimulationRunner {
                 controller.advanceTurn();
                 Thread.sleep(1000); // Pausa di 1 secondo tra i turni
             }
-            
+
             // Se il gioco è finito per una vittoria, termina il programma
             if (controller.getGameState().isFinished() && controller.getGameState().getWinner() != null) {
                 Thread.sleep(2000); // Attende 2 secondi per mostrare il messaggio di vittoria
@@ -59,7 +65,7 @@ public class SimulationRunner {
     }
 
     /**
-     * Interrompe la simulazione.
+     * Stops the simulation.
      */
     public void stop() {
         running = false;

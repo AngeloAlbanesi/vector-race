@@ -7,9 +7,9 @@ import javafx.application.Application;
 import javafx.stage.Stage;
 
 /**
- * Punto di ingresso dell'applicazione.
- * Se viene passato l'argomento "gui" viene usata l'interfaccia JavaFX,
- * altrimenti la CLI.
+ * Entry point of the application.
+ * If the argument "gui" is passed, the JavaFX interface is used,
+ * otherwise the CLI is used.
  */
 public class Main extends Application {
 
@@ -25,6 +25,12 @@ public class Main extends Application {
         }
     }
 
+    /**
+     * Main method of the application.
+     *
+     * @param args Command line arguments. If the first argument is "gui", the GUI is launched.
+     *             Otherwise, the CLI is launched.
+     */
     public static void main(String[] args) {
         if (args.length > 0 && args[0].equalsIgnoreCase("gui")) {
             launch(args);

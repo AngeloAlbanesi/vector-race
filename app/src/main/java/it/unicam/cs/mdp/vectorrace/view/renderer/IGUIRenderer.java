@@ -6,15 +6,15 @@ import it.unicam.cs.mdp.vectorrace.model.game.GameState;
 import java.util.Set;
 
 /**
- * Interfaccia per il rendering grafico dello stato del gioco.
- * Si occupa della rappresentazione visiva dello stato del gioco usando JavaFX.
+ * Interface for the graphical rendering of the game state.
+ * It is responsible for the visual representation of the game state using JavaFX.
  */
 public interface IGUIRenderer {
     /**
-     * Renderizza graficamente lo stato del gioco.
-     * 
-     * @param state lo stato del gioco da renderizzare
-     * @param validMoves le posizioni valide per il movimento corrente
+     * Renders the game state graphically.
+     *
+     * @param state      The state of the game to render.
+     * @param validMoves The valid positions for the current move.
      */
     void render(GameState state, Set<Position> validMoves);
 }

@@ -3,21 +3,22 @@ package it.unicam.cs.mdp.vectorrace.view;
 import it.unicam.cs.mdp.vectorrace.model.game.GameState;
 
 /**
- * Interfaccia che definisce i metodi comuni per tutte le viste del gioco.
- * Implementa il pattern Strategy per permettere diverse implementazioni della visualizzazione.
+ * The {@code GameView} interface defines the common methods for all views of the Vector Race game.
+ * It implements the Strategy pattern to allow different implementations of the visualization,
+ * such as a command-line interface (CLI) view or a graphical user interface (GUI) view.
  */
 public interface GameView {
     /**
-     * Visualizza un messaggio all'utente.
-     * 
-     * @param message Il messaggio da visualizzare
+     * Displays a message to the user.
+     *
+     * @param message The message to display.
      */
     void displayMessage(String message);
 
     /**
-     * Visualizza lo stato corrente del gioco.
-     * 
-     * @param gameState Lo stato del gioco da visualizzare
+     * Displays the current state of the game.
+     *
+     * @param gameState The game state to display.
      */
     void displayGameState(GameState gameState);
 }

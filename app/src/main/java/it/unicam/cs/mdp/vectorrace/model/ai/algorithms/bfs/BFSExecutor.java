@@ -7,20 +7,40 @@ import it.unicam.cs.mdp.vectorrace.model.core.Track;
 import it.unicam.cs.mdp.vectorrace.model.core.Vector;
 
 /**
- * Classe responsabile dell'esecuzione dell'algoritmo BFS.
- * Implementa la logica di ricerca delegando la gestione dello stato al
- * BFSStateManager.
+ * Executes the Breadth-First Search (BFS) algorithm to find a path.
+ * This class manages the search process, exploring the game space and
+ * delegating state management to the {@link BFSStateManager}.
+ *
+ * <p>Key responsibilities:
+ * <ul>
+ *   <li>BFS search execution</li>
+ *   <li>State management delegation</li>
+ *   <li>Neighbor node processing</li>
+ *   <li>Path reconstruction</li>
+ * </ul>
  */
 public class BFSExecutor {
     private static final int MAX_SPEED = 4;
     private final IMoveValidator moveValidator;
 
+    /**
+     * Creates a new BFSExecutor with the specified move validator.
+     *
+     * @param moveValidator The move validator to use for pathfinding.
+     */
     public BFSExecutor(IMoveValidator moveValidator) {
         this.moveValidator = moveValidator;
     }
 
     /**
-     * Esegue la ricerca BFS per trovare il percorso verso il target.
+     * Executes the BFS search to find a path to the target.
+     *
+     * @param start The starting position.
+     * @param startVelocity The starting velocity.
+     * @param target The target position.
+     * @param track The track to search within.
+     * @return A BFSSearchResult containing the next acceleration vector and a flag
+     *         indicating if a path was found.
      */
     public BFSSearchResult search(Position start, Vector startVelocity, Position target, Track track) {
         BFSStateManager stateManager = new BFSStateManager(start, startVelocity);
@@ -39,14 +59,24 @@ public class BFSExecutor {
     }
 
     /**
-     * Verifica se il nodo corrente ha raggiunto il target.
+     * Checks if the current node has reached the target position.
+     *
+     * @param node The current node.
+     * @param target The target position.
+     * @return true if the node's position matches the target, false otherwise.
      */
     private boolean isTargetReached(BFSNode node, Position target) {
         return node.getPosition().equals(target);
     }
 
     /**
-     * Processa tutti i nodi vicini del nodo corrente.
+     * Processes all neighbor nodes of the current node.
+     * Generates valid neighbor nodes by applying all possible acceleration
+     * vectors and adding them to the state manager.
+     *
+     * @param currentNode The current node.
+     * @param stateManager The state manager for BFS.
+     * @param track The track to validate moves against.
      */
     private void processNeighbors(BFSNode currentNode, BFSStateManager stateManager, Track track) {
         for (Vector acceleration : AccelerationType.getAllVectors()) {
@@ -59,8 +89,12 @@ public class BFSExecutor {
     }
 
     /**
-     * Genera un nuovo nodo vicino applicando l'accelerazione.
-     * Ritorna null se il nodo non rispetta i limiti di velocità.
+     * Generates a new neighbor node by applying the given acceleration.
+     * Returns null if the resulting velocity exceeds the maximum speed limit.
+     *
+     * @param currentNode The current node.
+     * @param acceleration The acceleration vector to apply.
+     * @return The new neighbor node, or null if the velocity is invalid.
      */
     private BFSNode generateNeighbor(BFSNode currentNode, Vector acceleration) {
         Vector newVelocity = currentNode.getVelocity().add(acceleration);
@@ -75,7 +109,11 @@ public class BFSExecutor {
     }
 
     /**
-     * Verifica se la mossa è valida secondo il validatore.
+     * Checks if a move is valid according to the move validator.
+     *
+     * @param node The node representing the move.
+     * @param track The track to validate against.
+     * @return true if the move is valid, false otherwise.
      */
     private boolean isValidMove(BFSNode node, Track track) {
         return moveValidator.validateTempMove(
@@ -85,7 +123,12 @@ public class BFSExecutor {
     }
 
     /**
-     * Ricostruisce il percorso dal nodo goal fino allo start.
+     * Reconstructs the path from the goal node to the start node.
+     *
+     * @param goalNode The goal node.
+     * @param startNode The start node.
+     * @return A BFSSearchResult containing the next acceleration vector and a flag
+     *         indicating if a path was found.
      */
     private BFSSearchResult reconstructPath(BFSNode goalNode, BFSNode startNode) {
         BFSNode current = goalNode;
