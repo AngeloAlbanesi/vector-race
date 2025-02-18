@@ -22,17 +22,18 @@ public class CLIMenuManager {
      */
     public void run() {
         boolean running = true;
-        while(running) {
+        while (running) {
             view.showGameMenu();
             String input = view.readLine();
             running = processChoice(input);
         }
+        System.exit(0); // Terminate the program when the menu loop ends
     }
 
     private boolean processChoice(String input) {
         try {
             int choice = Integer.parseInt(input);
-            return switch(choice) {
+            return switch (choice) {
                 case 1 -> handleSimulation();
                 case 2 -> handleSingleTurn();
                 case 3 -> false;
@@ -41,7 +42,7 @@ public class CLIMenuManager {
                     yield true;
                 }
             };
-        } catch(NumberFormatException e) {
+        } catch (NumberFormatException e) {
             view.showError("Input non valido. Inserisci un numero tra 1 e 2.");
             return true;
         }
@@ -53,7 +54,7 @@ public class CLIMenuManager {
     }
 
     private boolean handleSingleTurn() {
-        if(controller.getGameState().isFinished()) {
+        if (controller.getGameState().isFinished()) {
             view.displayMessage("La gara è già terminata!");
             return false;
         }
