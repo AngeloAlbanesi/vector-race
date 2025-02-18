@@ -25,12 +25,12 @@ public class ConsoleOutputHandler implements IOutputHandler {
      * Clears the console screen (limited support).
      */
     public void clear() {
-        // Tentativo di pulire la console in sistemi Unix-like
+        // Attempt to clear the console on Unix-like systems
         System.out.print("\033[H\033[2J");
         System.out.flush();
 
-        // In caso di Windows o se il metodo precedente non funziona
-        // stampa alcune righe vuote
+        
+        // If the method above fails, print some empty lines
         for(int i = 0; i < 50; i++) {
             System.out.println();
         }

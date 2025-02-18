@@ -100,7 +100,7 @@ public class GUIView extends Application implements GameView {
         initializeManagers();
         configureEventHandlers(cellSize);
         setupStage(primaryStage, root);
-        // Renderizza solo lo stato iniziale senza avanzare il turno
+        // Render only the initial state without advancing the turn
         renderer.render(controller.getGameState(), stateManager.getValidMoves());
     }
 
@@ -114,12 +114,12 @@ public class GUIView extends Application implements GameView {
         GUIComponentFactory componentFactory = new GUIComponentFactory();
         BorderPane root = componentFactory.createMainLayout();
 
-        // Configurazione canvas e renderer
+        // Configuration of the canvas and renderer
         canvas = componentFactory.createGameCanvas(controller.getGameState().getTrack(), cellSize);
         root.setCenter(canvas);
         this.renderer = new GUIRenderer(canvas, cellSize);
 
-        // Creazione controlli UI
+        // Creation of UI controls
         statusLabel = componentFactory.createStatusLabel();
         startButton = componentFactory.createStartButton();
         pauseButton = componentFactory.createPauseButton();
@@ -127,7 +127,7 @@ public class GUIView extends Application implements GameView {
         exitButton = componentFactory.createExitButton();
         speedSlider = componentFactory.createSpeedSlider();
 
-        // Configurazione pannello controlli
+        // Configuration of the control panel
         root.setBottom(componentFactory.createControlPanel(
             startButton, pauseButton, stepButton, exitButton, speedSlider, statusLabel
         ));

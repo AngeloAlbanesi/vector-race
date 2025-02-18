@@ -36,14 +36,14 @@ public class CLIGameRenderer implements IGameRenderer {
     }
 
     private String getCellRepresentation(Position pos, Track track, GameState gameState) {
-        // Prima controlla se c'è un giocatore nella posizione
+        // Firt check if there is a player at the position
         for (Player player : gameState.getPlayers()) {
             if (player.getPosition().equals(pos)) {
                 return player.getName().substring(player.getName().length() - 1);
             }
         }
 
-        // Altrimenti, determina il tipo di cella
+        // Otherwise, determine the cell type
         CellType cellType = track.getCell(pos.getX(), pos.getY());
         return switch (cellType) {
             case WALL -> WALL_CELL;

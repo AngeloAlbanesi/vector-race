@@ -100,7 +100,7 @@ public class GUIInputHandler {
     public void handleGridClick(double mouseX, double mouseY, int cellSize, GameState gameState, Set<Position> validMoves) {
         Player currentPlayer = gameState.getCurrentPlayer();
 
-        // Verifica se il gioco è in pausa o se il giocatore non è umano
+        // Checks if the game is paused or if the player is not human
         if (!isPaused || !(currentPlayer instanceof HumanPlayer)) {
             return;
         }

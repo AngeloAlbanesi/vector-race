@@ -41,9 +41,9 @@ public class SimulationRunner {
                 Thread.sleep(1000); // Pausa di 1 secondo tra i turni
             }
 
-            // Se il gioco è finito per una vittoria, termina il programma
+            // If the game is finished due to a victory, terminate the program
             if (controller.getGameState().isFinished() && controller.getGameState().getWinner() != null) {
-                Thread.sleep(2000); // Attende 2 secondi per mostrare il messaggio di vittoria
+                Thread.sleep(1000); 
                 System.out.println("Il giocatore " + controller.getGameState().getWinner().getName() + " ha vinto!");
                 System.exit(0);
             }
