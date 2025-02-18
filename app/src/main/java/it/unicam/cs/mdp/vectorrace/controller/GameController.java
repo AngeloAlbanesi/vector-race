@@ -43,25 +43,69 @@ public class GameController {
      * @return Il nuovo stato di gioco inizializzato
      * @throws IOException Se si verificano errori durante il caricamento dei file
      */
+    /**
+     * Inizializza un nuovo gioco con logging delle operazioni.
+     *
+     * @param trackFile Il percorso del file del circuito
+     * @param playerFile Il percorso del file dei giocatori
+     * @return Il nuovo stato di gioco inizializzato
+     * @throws IOException Se si verificano errori durante il caricamento dei file
+     */
     public static GameState initializeGame(String trackFile, String playerFile) throws IOException {
-        // Carica il circuito
+        logInitializationStart();
+        Track track = loadTrack(trackFile);
+        List<Position> startPositions = validateStartPositions(track);
+        List<Player> players = initializePlayers(playerFile, startPositions);
+        return createGameState(track, players);
+    }
+
+    /**
+     * Logga l'inizio dell'inizializzazione.
+     */
+    private static void logInitializationStart() {
         System.out.println("Inizializzazione gioco...");
+    }
+
+    /**
+     * Carica il circuito da file con logging.
+     */
+    private static Track loadTrack(String trackFile) throws IOException {
         System.out.println("Caricamento circuito da: " + trackFile);
         Track track = TrackLoader.loadTrack(trackFile);
         System.out.println("Circuito caricato: " + track.getWidth() + "x" + track.getHeight());
+        return track;
+    }
 
-        // Trova le posizioni di partenza
+    /**
+     * Valida e trova le posizioni di partenza nel circuito.
+     *
+     * @throws IllegalStateException se non ci sono posizioni di partenza
+     */
+    private static List<Position> validateStartPositions(Track track) {
         List<Position> startPositions = findStartPositions(track);
         System.out.println("Trovate " + startPositions.size() + " posizioni di partenza");
+        
         if (startPositions.isEmpty()) {
             throw new IllegalStateException("Il circuito non ha posizioni di partenza (S)");
         }
+        
+        return startPositions;
+    }
 
-        // Carica i giocatori
+    /**
+     * Inizializza i giocatori da file.
+     */
+    private static List<Player> initializePlayers(String playerFile, List<Position> startPositions) throws IOException {
         System.out.println("Caricamento giocatori da: " + playerFile);
         List<Player> players = PlayerFactory.createPlayersFromFile(playerFile, startPositions);
         System.out.println("Creati " + players.size() + " giocatori");
+        return players;
+    }
 
+    /**
+     * Crea un nuovo stato di gioco con il circuito e i giocatori specificati.
+     */
+    private static GameState createGameState(Track track, List<Player> players) {
         return new GameState(track, players);
     }
 

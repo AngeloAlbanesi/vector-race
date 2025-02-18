@@ -42,7 +42,7 @@ public class CLIMenuManager {
                 }
             };
         } catch(NumberFormatException e) {
-            view.showError("Input non valido. Inserisci un numero tra 1 e 3.");
+            view.showError("Input non valido. Inserisci un numero tra 1 e 2.");
             return true;
         }
     }

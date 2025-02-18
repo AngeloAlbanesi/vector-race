@@ -28,7 +28,6 @@ public class CLIGameRenderer implements IGameRenderer {
             for (int x = 0; x < track.getWidth(); x++) {
                 Position currentPos = new Position(x, y);
                 builder.append(getCellRepresentation(currentPos, track, gameState));
-                builder.append(" ");
             }
             builder.append("\n");
         }
