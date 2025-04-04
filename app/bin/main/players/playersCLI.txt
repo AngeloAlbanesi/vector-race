@@ -1,4 +1,3 @@
 # Formato: Tipo;Nome;Colore (HEX);Strategia (1=BFS, 2=PureAStarStrategy)
-Bot;Bot1;#FFFFFF;1
-Bot;Bot2;#0000F0;2
-
+Bot;Bot1;1
+Bot;Bot2;2

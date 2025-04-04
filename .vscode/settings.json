@@ -1,4 +1,6 @@
 {
     "java.compile.nullAnalysis.mode": "automatic",
-    "java.configuration.updateBuildConfiguration": "automatic"
+    "java.configuration.updateBuildConfiguration": "automatic",
+    "github.copilot.chat.codesearch.enabled": true,
+    "github.copilot.nextEditSuggestions.enabled": true
 }

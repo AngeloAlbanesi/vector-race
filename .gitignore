@@ -6,3 +6,6 @@ build
 
 # Ignore Java compiled class files
 *.class
+
+# Ignore macOS system files
+.DS_Store
