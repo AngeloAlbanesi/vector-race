@@ -9,3 +9,4 @@ build
 
 # Ignore macOS system files
 .DS_Store
+.github/copilot-instructions.md
